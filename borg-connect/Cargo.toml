@@ -10,7 +10,7 @@ repository = "https://github.com/trufflepig-forensics/borg-vinculum"
 
 [dependencies]
 # Async runtime
-tokio = { version = "~1", features = ["macros", "rt"] }
+tokio = { version = ">=1.23.1", features = ["macros", "rt"] }
 
 # Http client
 reqwest = { version = "~0.11", features = ["rustls-tls-native-roots", "json"] }

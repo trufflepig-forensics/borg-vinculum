@@ -18,7 +18,7 @@ actix-toolbox = { version = "~0.10", features = ["logging", "session"] }
 log = { version = "~0.4" }
 
 # Async runtime
-tokio = { version = "~1", features = ["macros", "rt-multi-thread", "sync"] }
+tokio = { version = ">=1.23.1", features = ["macros", "rt-multi-thread", "sync"] }
 
 # ORM
 rorm = { version = "~0.5", features = ["cli", "tokio-rustls", "uuid"] }
