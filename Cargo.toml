@@ -1,27 +1,5 @@
-[package]
-name = "borg-vinculum"
-version = "0.1.0"
-edition = "2021"
-authors = ["Niklas Pfister <git@omikron.dev>"]
-license = "MIT"
-repository = "https://github.com/trufflepig-forensics/borg-vinculum"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
-[dependencies]
-# Webframework
-actix-web = { version = "~4" }
-# Helper and middleware for actix-web
-actix-toolbox = { version = "~0.10", features = ["logging", "session"] }
-
-# Logging facade
-log = { version = "~0.4" }
-
-# Async runtime
-tokio = { version = "~1", features = ["macros", "rt-multi-thread", "sync"] }
-
-# ORM
-rorm = { version = "~0.5", features = ["cli", "tokio-rustls", "uuid"] }
-
-[features]
-rorm-main = []
+[workspace]
+members = [
+    "./borg-connect",
+    "./borg-vinculum",
+]

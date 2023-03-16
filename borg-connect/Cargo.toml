@@ -1,0 +1,16 @@
+[package]
+name = "borg-connect"
+version = "0.1.0"
+edition = "2021"
+authors = ["Niklas Pfister <git@omikron.dev>"]
+license = "MIT"
+repository = "https://github.com/trufflepig-forensics/borg-vinculum"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Async runtime
+tokio = { version = "~1", features = ["macros", "rt"] }
+
+# Http client
+reqwest = { version = "~0.11", features = ["rustls-tls-native-roots", "json"] }
