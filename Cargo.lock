@@ -481,8 +481,15 @@ dependencies = [
 name = "borg-connect"
 version = "0.1.0"
 dependencies = [
+ "clap",
+ "env_logger",
+ "log",
  "reqwest",
+ "serde",
+ "serde_json",
  "tokio",
+ "toml",
+ "url",
 ]
 
 [[package]]
@@ -995,6 +1002,19 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071a31f4ee85403370b58aca746f01041ede6f0da2730960ad001edc2b71b394"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "env_logger"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85cdab6a89accf66733ad5a1693a4dcced6aeff64602b634530dd73c1f3ee9f0"
+dependencies = [
+ "humantime",
+ "is-terminal",
+ "log",
+ "regex",
+ "termcolor",
 ]
 
 [[package]]

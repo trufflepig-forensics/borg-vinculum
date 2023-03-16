@@ -3,6 +3,7 @@
 use std::fs::read_to_string;
 
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 /// The configuration of borg-connect
 ///
@@ -12,6 +13,8 @@ use serde::{Deserialize, Serialize};
 pub struct Config {
     /// The path where the borg command can be found
     pub borg_path: String,
+    /// The address of the [borg_vinculum] server.
+    pub vinculum_address: Url,
 }
 
 /// Retrieve the config file from the given `config_path`.
