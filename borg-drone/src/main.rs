@@ -7,6 +7,8 @@ use std::env;
 
 use clap::{ArgAction, Parser, Subcommand};
 
+use crate::config::get_config;
+
 pub mod config;
 
 /// The available commands for borg-connect
@@ -35,7 +37,7 @@ pub struct Cli {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() {
+async fn main() -> Result<(), String> {
     let cli = Cli::parse();
 
     if env::var("RUST_LOG").is_err() {
@@ -48,7 +50,11 @@ async fn main() {
 
     env_logger::init();
 
+    let _config = get_config(&cli.config_path)?;
+
     match cli.command {
         Command::Create => {}
     }
+
+    Ok(())
 }

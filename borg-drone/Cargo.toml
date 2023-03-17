@@ -1,5 +1,5 @@
 [package]
-name = "borg-connect"
+name = "borg-drone"
 version = "0.1.0"
 edition = "2021"
 authors = ["Niklas Pfister <git@omikron.dev>"]
