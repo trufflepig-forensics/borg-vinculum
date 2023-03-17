@@ -1,7 +1,9 @@
 //! The configuration definitions and parsing of lives here
 
-use std::fs::read_to_string;
+use std::fs::{metadata, read_to_string};
+use std::os::unix::fs::MetadataExt;
 
+use log::warn;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
@@ -21,6 +23,18 @@ pub struct Config {
 ///
 /// If the file was not found or could not be deserialized, an error is returned.
 pub fn get_config(config_path: &str) -> Result<Config, String> {
+    let Ok(m) = metadata(config_path) else {
+        return Err(format!("File {config_path} does not exist"));
+    };
+
+    if !m.is_file() {
+        return Err(format!("{config_path} is not a file"));
+    }
+
+    if m.mode() != 0o600 || m.mode() != 0o400 {
+        warn!("{config_path} has too broad permissions. 0600 or 0400 are recommended.");
+    }
+
     let c = read_to_string(config_path).map_err(|e| format!("Couldn't read config file: {e}"))?;
 
     let config = toml::from_str(&c).map_err(|e| format!("Couldn't deserialize config: {e}"))?;
