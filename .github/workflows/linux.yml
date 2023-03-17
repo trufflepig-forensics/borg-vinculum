@@ -31,8 +31,8 @@ jobs:
           rustup component add clippy
           cargo install clippy-sarif sarif-fmt
 
-      - name: Build borg-vinculum
-        run: cargo build -p borg-vinculum -p borg-connect
+      - name: Build all in workspace
+        run: cargo build -p borg-vinculum -p borg-drone
 
       - name: Run rust-clippy
         run: cargo clippy --workspace --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
