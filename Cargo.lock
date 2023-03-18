@@ -493,6 +493,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "borg-parse"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "borg-vinculum"
 version = "0.1.0"
 dependencies = [
@@ -504,7 +512,9 @@ dependencies = [
  "rand",
  "rorm",
  "rpassword",
+ "serde",
  "tokio",
+ "toml",
  "utoipa",
  "utoipa-swagger-ui",
  "uuid",

@@ -1,0 +1,14 @@
+[package]
+name = "borg-parse"
+version = "0.1.0"
+edition = "2021"
+authors = ["Niklas Pfister <git@omikron.dev>"]
+license = "MIT"
+repository = "https://github.com/trufflepig-forensics/borg-vinculum"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Serialization support
+serde = { version = "~1", features = ["derive"] }
+serde_json = { version = "~1" }
