@@ -7,29 +7,16 @@ use std::env;
 
 use clap::{ArgAction, Parser, Subcommand};
 
-use crate::commands::CheckOptions;
 use crate::config::get_config;
 
-pub mod commands;
 pub mod config;
+pub mod create;
 
 /// The available commands for borg-connect
 #[derive(Subcommand)]
 pub enum Command {
-    /// Check the state of an repository, archive or both
-    Check {
-        /// Specify an alternative path on the remote path
-        #[clap(long)]
-        remote_path: Option<String>,
-        /// The path of the remote repository
-        repository_path: String,
-    },
     /// Create a new archive in an existing repository
-    Create {
-        /// Start in UI mode
-        #[clap(long, default_value_t = false)]
-        ui: bool,
-    },
+    Create,
 }
 
 /// A helper utility for integrating borg in the vinculum.
@@ -43,7 +30,7 @@ pub struct Cli {
     verbosity: u8,
 
     /// The config path of borg-backup
-    #[clap(long, default_value_t = String::from("/etc/borg-connect/config.toml"))]
+    #[clap(long, default_value_t = String::from("/etc/borg-drone/config.toml"))]
     config_path: String,
 
     #[clap(subcommand)]
@@ -67,20 +54,7 @@ async fn main() -> Result<(), String> {
     let config = get_config(&cli.config_path)?;
 
     match cli.command {
-        Command::Check {
-            remote_path,
-            repository_path,
-        } => {
-            let remote_path = remote_path.or(config.borg.remote_path);
-
-            let c = CheckOptions {
-                repository_path,
-                remote_path,
-            };
-
-            commands::run_check(c).await?;
-        }
-        Command::Create { ui } => {}
+        Command::Create => create::create(config).await?,
     }
 
     Ok(())

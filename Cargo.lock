@@ -488,6 +488,7 @@ name = "borg-drone"
 version = "0.1.0"
 dependencies = [
  "borgbackup",
+ "byte-unit",
  "clap",
  "env_logger",
  "log",

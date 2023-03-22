@@ -13,6 +13,15 @@ use url::Url;
 pub struct BorgConfig {
     /// The remote path of borg
     pub remote_path: Option<String>,
+    /// The path to the pattern file.
+    ///
+    /// Refer to <https://borgbackup.readthedocs.io/en/stable/usage/help.html#borg-help-patterns>
+    /// for further information how to specify patterns
+    pub pattern_file_path: String,
+    /// The repository specifier
+    pub repository: String,
+    /// The passphrase for the repository
+    pub passphrase: String,
 }
 
 /// The configuration of borg-connect
@@ -21,8 +30,6 @@ pub struct BorgConfig {
 #[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Config {
-    /// The path where the borg command can be found
-    pub borg_path: String,
     /// The address of the [borg_vinculum] server.
     pub vinculum_address: Url,
     /// Borg specific configuration
@@ -41,12 +48,11 @@ pub fn get_config(config_path: &str) -> Result<Config, String> {
         return Err(format!("{config_path} is not a file"));
     }
 
-    if m.mode() != 0o600 || m.mode() != 0o400 {
-        warn!("{config_path} has too broad permissions. 0600 or 0400 are recommended.");
+    if m.mode() & 0o007 > 1 || m.mode() & 0o020 > 0 {
+        warn!("{config_path} has too broad permissions. 0600, 0400, 0640 are recommended.");
     }
 
     let c = read_to_string(config_path).map_err(|e| format!("Couldn't read config file: {e}"))?;
-
     let config = toml::from_str(&c).map_err(|e| format!("Couldn't deserialize config: {e}"))?;
 
     Ok(config)
