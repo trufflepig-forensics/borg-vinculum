@@ -1,0 +1,14 @@
+.login {
+    display: flex;
+    flex-direction: column;
+    border-radius: 2em;
+    border: 2px solid white;
+    box-shadow: 0 0 2em -0.5em var(--primary);
+    padding: 2em;
+    background: var(--level-0);
+    text-align: center;
+}
+
+.login > * {
+    margin-bottom: 1em;
+}
