@@ -1,5 +1,7 @@
 .idea/
 .vagrant/
 
+vagrant/vars.yml
+
 /target
 .models.json

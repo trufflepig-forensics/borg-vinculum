@@ -1,0 +1,7 @@
+- name: Deploy borg remote
+  hosts: remote
+  vars:
+    - ansible_become: yes
+  vars_files:
+    - vars.yml
+  tasks:
