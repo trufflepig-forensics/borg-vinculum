@@ -1,6 +1,5 @@
 [workspace]
 members = [
     "./borg-drone",
-    "./borg-parse",
     "./borg-vinculum",
 ]

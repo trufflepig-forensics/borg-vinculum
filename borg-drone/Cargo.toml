@@ -13,7 +13,9 @@ repository = "https://github.com/trufflepig-forensics/borg-vinculum"
 clap = { version = "~4", features = ["derive"] }
 
 # Async runtime
-tokio = { version = ">=1.23.1", features = ["macros", "rt"] }
+tokio = { version = ">=1.23.1", features = ["macros", "rt", "process"] }
+# Posix parser
+shlex = { version = "~1" }
 
 # Http client
 reqwest = { version = "~0.11", features = ["rustls-tls-native-roots", "json"] }
@@ -27,3 +29,6 @@ url = { version = "~2", features = ["serde"] }
 # Logging
 log = { version = "~0.4" }
 env_logger = { version = "~0.10" }
+
+# Borgbackup wrapper
+borgbackup = { version = "~0.5", features = ["tokio"] }

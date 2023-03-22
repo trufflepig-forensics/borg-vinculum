@@ -7,6 +7,14 @@ use log::warn;
 use serde::{Deserialize, Serialize};
 use url::Url;
 
+/// The common settings for borg
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct BorgConfig {
+    /// The remote path of borg
+    pub remote_path: Option<String>,
+}
+
 /// The configuration of borg-connect
 ///
 /// The struct is deserialized from file
@@ -17,6 +25,8 @@ pub struct Config {
     pub borg_path: String,
     /// The address of the [borg_vinculum] server.
     pub vinculum_address: Url,
+    /// Borg specific configuration
+    pub borg: BorgConfig,
 }
 
 /// Retrieve the config file from the given `config_path`.
