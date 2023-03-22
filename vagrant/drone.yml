@@ -5,3 +5,59 @@
   vars_files:
     - vars.yml
   tasks:
+    - name: Install dependencies
+      apt:
+        state: latest
+        name:
+          - htop
+          - vim
+          - libssl-dev
+
+    - name: Install borg
+      get_url:
+        url: "https://github.com/borgbackup/borg/releases/download/1.2.3/borg-linux64"
+        dest: /usr/local/bin/borg
+        mode: 0750
+        owner: root
+        group: root
+
+    - name: Check for rustup
+      ansible.builtin.stat:
+        path: "/tmp/rustup.sh"
+      register: rustup_file
+    - name: Download rustup
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup.sh"
+      when: not rustup_file.stat.exists
+    - name: Execute installer
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "sh /tmp/rustup.sh -y"
+      when: not rustup_file.stat.exists
+
+    - name: Create /etc/borg-drone
+      ansible.builtin.file:
+        name: /etc/borg-drone
+        state: directory
+        mode: 0700
+        owner: root
+    - name: Apply borg-drone config.toml
+      template:
+        src: drone/config.toml.jinja2
+        dest: /etc/borg-drone/config.toml
+        owner: root
+        mode: 0600
+
+    - name: Compile drone
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant
+        cmd: "/home/vagrant/.cargo/bin/cargo build -r -p borg-drone"
+    - name: Copy to /usr/local/bin
+      copy:
+        remote_src: yes
+        src: /vagrant/target/release/borg-drone
+        dest: /usr/local/bin/borg-drone
+        mode: 0755
+        owner: root

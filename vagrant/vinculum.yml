@@ -5,3 +5,161 @@
   vars_files:
     - vars.yml
   tasks:
+    - name: Install dependencies
+      apt:
+        state: latest
+        name:
+          - htop
+          - vim
+          - nginx
+          - postgresql
+          - gnupg2
+          - libssl-dev
+          # Required for ansible
+          - acl
+          - python3-psycopg2
+
+
+    - name: Install borg
+      get_url:
+        url: "https://github.com/borgbackup/borg/releases/download/1.2.3/borg-linux64"
+        dest: /usr/local/bin/borg
+        mode: 0750
+        owner: root
+        group: root
+
+    - name: Install key
+      ansible.builtin.apt_key:
+        state: present
+        url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
+    - name: node repository
+      ansible.builtin.apt_repository:
+        repo: "deb https://deb.nodesource.com/node_18.x bullseye main"
+    - name: Install node
+      ansible.builtin.apt:
+        state: latest
+        name: nodejs
+    - name: Install yarn
+      ansible.builtin.command:
+        cmd: "npm install -g yarn"
+
+    - name: Check for rustup
+      ansible.builtin.stat:
+        path: "/tmp/rustup.sh"
+      register: rustup_file
+    - name: Download rustup
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs > /tmp/rustup.sh"
+      when: not rustup_file.stat.exists
+    - name: Execute installer
+      become_user: vagrant
+      ansible.builtin.shell:
+        cmd: "sh /tmp/rustup.sh -y"
+      when: not rustup_file.stat.exists
+
+    - name: Start postgres
+      ansible.builtin.systemd:
+        name: postgresql
+        state: started
+    - name: Create vinculum db user
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ vinculum_db_user }}"
+        password: "{{ vinculum_db_password }}"
+    - name: Create vinculum database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ vinculum_db_name }}"
+        encoding: UTF-8
+        owner: "{{ vinculum_db_user }}"
+
+    - name: Create vinculum group
+      ansible.builtin.group:
+        name: vinculum
+    - name: Create vinculum user
+      ansible.builtin.user:
+        name: vinculum
+        system: yes
+        group: vinculum
+
+    - name: Create /etc/vinculum
+      ansible.builtin.file:
+        name: /etc/vinculum
+        state: directory
+        mode: 0750
+        owner: root
+        group: vinculum
+    - name: Apply vinculum config.toml
+      template:
+        src: vinculum/config.toml.jinja2
+        dest: /etc/vinculum/config.toml
+        owner: root
+        group: vinculum
+        mode: 0640
+
+    - name: Compile vinculum
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant
+        cmd: "/home/vagrant/.cargo/bin/cargo build -r -p borg-vinculum"
+    - name: Copy to /usr/local/bin
+      copy:
+        remote_src: yes
+        src: /vagrant/target/release/borg-vinculum
+        dest: /usr/local/bin/vinculum
+        mode: 0755
+        owner: root
+
+    - name: Stop vinculum.service
+      systemd:
+        name: vinculum.service
+        state: stopped
+      ignore_errors: yes
+    - name: Apply migrations
+      command:
+        chdir: /vagrant/borg-vinculum
+        cmd: /usr/local/bin/vinculum migrate migrations/
+
+    - name: Install systemd service
+      copy:
+        src: vinculum/vinculum.service
+        dest: /etc/systemd/system/vinculum.service
+        owner: root
+    - name: Restart vinculum
+      systemd:
+        enabled: yes
+        name: vinculum.service
+        state: restarted
+
+    - name: Install packages
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant/borg-vinculum/ui/
+        cmd: "yarn install"
+    - name: Build frontend
+      become_user: vagrant
+      ansible.builtin.command:
+        chdir: /vagrant/borg-vinculum/ui/
+        cmd: "yarn build"
+    - name: Copy frontend to static dir
+      ansible.builtin.copy:
+        remote_src: yes
+        src: /vagrant/borg-vinculum/ui/dist/
+        dest: /var/www/vinculum
+
+    - name: Apply nginx template
+      template:
+        src: vinculum/vinculum.nginx.jinja2
+        dest: /etc/nginx/sites-available/vinculum.conf
+    - name: Link to enabled
+      file:
+        state: link
+        owner: root
+        group: root
+        src: /etc/nginx/sites-available/vinculum.conf
+        dest: /etc/nginx/sites-enabled/vinculum.conf
+    - name: Reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
