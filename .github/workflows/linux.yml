@@ -22,8 +22,8 @@ jobs:
       - name: Build
         working-directory: borg-vinculum/ui
         run: |
-          npm install
-          npm run build
+          yarn install
+          yarn build
 
   build_rs:
     name: Build & Test on linux
