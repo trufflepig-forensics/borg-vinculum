@@ -1,10 +1,13 @@
 //! Creation of archives are defined here
 
-use std::time::Instant;
+use std::ops::Sub;
 
+use borgbackup::asynchronous::CreateProgress;
 use borgbackup::common::{CommonOptions, CompressionMode, CreateOptions};
 use byte_unit::Byte;
+use chrono::Utc;
 use log::info;
+use tokio::sync::mpsc;
 
 use crate::config::Config;
 
@@ -17,7 +20,7 @@ pub async fn create(config: Config) -> Result<(), String> {
 
     let options = CreateOptions {
         repository: config.borg.repository,
-        archive: "{now}".to_string(),
+        archive: "{utcnow}".to_string(),
         passphrase: Some(config.borg.passphrase),
         comment: None,
         compression: Some(CompressionMode::Lz4),
@@ -35,20 +38,38 @@ pub async fn create(config: Config) -> Result<(), String> {
         no_flags: false,
     };
 
-    info!("Starting to create the archive");
-    let start = Instant::now();
+    let (tx, mut rx) = mpsc::channel(1);
+    tokio::spawn(async move {
+        while let Some(CreateProgress::Progress {
+            original_size,
+            compressed_size,
+            deduplicated_size,
+            path,
+            ..
+        }) = rx.recv().await
+        {
+            info!(
+                "O: {o}, C: {c}, D: {d}, Path: {path}",
+                o = Byte::from(original_size as u128).get_appropriate_unit(false),
+                c = Byte::from(compressed_size as u128).get_appropriate_unit(false),
+                d = Byte::from(deduplicated_size as u128).get_appropriate_unit(false),
+            )
+        }
+    });
 
-    let stats = borgbackup::asynchronous::create(&options, &common_options)
+    info!("Starting to create the archive");
+    let start = Utc::now();
+
+    let stats = borgbackup::asynchronous::create_progress(&options, &common_options, tx)
         .await
         .map_err(|err| err.to_string())?;
 
-    let duration = Instant::now().duration_since(start);
+    let duration = Utc::now().sub(start);
     info!(
-        "Archive created, O: {o}, C: {c}, D: {d}, took {t} seconds",
+        "Archive created, O: {o}, C: {c}, D: {d}, took {duration}",
         o = Byte::from(stats.archive.stats.original_size as u128).get_appropriate_unit(false),
         c = Byte::from(stats.archive.stats.compressed_size as u128).get_appropriate_unit(false),
         d = Byte::from(stats.archive.stats.deduplicated_size as u128).get_appropriate_unit(false),
-        t = duration.as_secs()
     );
 
     Ok(())
