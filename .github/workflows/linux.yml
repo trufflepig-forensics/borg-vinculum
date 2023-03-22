@@ -9,6 +9,10 @@ jobs:
   build_ts:
     name: Build typescript
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
     strategy:
       matrix:
         node-version: [14.x, 16.x, 18.x]
