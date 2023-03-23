@@ -15,6 +15,7 @@ RuntimeDirectory=vinculum
 LogsDirectory=vinculum
 StateDirectory=vinculum
 ConfigurationDirectory=vinculum
+ConfigurationDirectoryMode=0750
 
 MemoryDenyWriteExecute=yes
 RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX

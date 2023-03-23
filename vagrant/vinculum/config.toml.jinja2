@@ -1,0 +1,26 @@
+[Server]
+ListenAddress = "127.0.0.1"
+ListenPort = 8080
+# You can generate a secret key by executing: vinculum keygen
+SecretKey = ""
+
+[Database]
+Host = "127.0.0.1"
+Port = 5432
+Name = "{{ vinculum_db_name }}"
+User = "{{ vinculum_db_user }}"
+Password = "{{ vinculum_db_password }}"
+
+[Logging]
+LogLevel = "info"
+Path = "/var/log/vinculum/main.log"
+RotationFileSize = "10 MB"
+MaxRotationCount = 10
+
+[[Logging.AdditionalFileLoggers]]
+Name = "requests"
+AddToMainLogger = true
+Path = "/var/log/vinculum/requests.log"
+RotationFileSize = "10 MB"
+MaxRotationCount = 5
+AlternativePattern = "{h([{d(%Y-%m-%d %H:%M:%S)} | {({l}):5.5}])} {m}{n}"
