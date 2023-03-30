@@ -32,6 +32,16 @@ pub struct BorgConfig {
 pub struct Config {
     /// The address of the [borg_vinculum] server.
     pub vinculum_address: Url,
+    /// The token provided by the [borg_vinculum] server.
+    pub vinculum_token: String,
+    /// The command that should be executed before borg create is executed.
+    ///
+    /// This may be an excellent time to stop databases, or make a dump, etc.
+    pub pre_hook: String,
+    /// The command that should be executed after borg create is executed.
+    ///
+    /// This may be an excellent time to stop databases, or make a dump, etc.
+    pub post_hook: String,
     /// Borg specific configuration
     pub borg: BorgConfig,
 }

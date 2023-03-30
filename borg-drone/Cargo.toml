@@ -26,7 +26,6 @@ serde_json = { version = "~1" }
 toml = { version = "~0.7" }
 url = { version = "~2", features = ["serde"] }
 byte-unit = { version = "~4" }
-chrono = { version = ">=0.4.20" }
 
 # Logging
 log = { version = "~0.4" }
@@ -34,3 +33,7 @@ env_logger = { version = "~0.10" }
 
 # Borgbackup wrapper
 borgbackup = { version = "~0.5", features = ["tokio"] }
+
+
+# The common structs of borg-drone and borg-vinculum
+common = { version = "0.1.0", path = "../common" }
