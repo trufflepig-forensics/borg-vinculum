@@ -135,17 +135,17 @@
     - name: Install packages
       become_user: vagrant
       ansible.builtin.command:
-        chdir: /vagrant/borg-vinculum/ui/
+        chdir: /vagrant/borg-vinculum/frontend/
         cmd: "yarn install"
     - name: Build frontend
       become_user: vagrant
       ansible.builtin.command:
-        chdir: /vagrant/borg-vinculum/ui/
+        chdir: /vagrant/borg-vinculum/frontend/
         cmd: "yarn build"
     - name: Copy frontend to static dir
       ansible.builtin.copy:
         remote_src: yes
-        src: /vagrant/borg-vinculum/ui/dist/
+        src: /vagrant/borg-vinculum/frontend/dist/
         dest: /var/www/vinculum
 
     - name: Apply nginx template
