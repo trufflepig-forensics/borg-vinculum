@@ -26,6 +26,7 @@ use crate::modules::matrix::MatrixApi;
 
 pub mod config;
 pub mod handler;
+pub(crate) mod middleware;
 pub mod models;
 pub mod modules;
 pub mod server;

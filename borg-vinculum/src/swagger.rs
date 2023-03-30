@@ -13,7 +13,7 @@ impl Modify for TokenSecurity {
                         .scheme(HttpAuthScheme::Bearer)
                         .bearer_format("JWT")
                         .description(Some(
-                            "The token is set in the configuration file in the server.",
+                            "The token is retrieved while creating drones in the server.",
                         ))
                         .build(),
                 ),

@@ -33,7 +33,9 @@ rpassword = { version = "~7" }
 
 # Serialization and deserialization library
 serde = { version = "~1", features = ["derive"] }
+serde_repr = { version = "~0.1" }
 toml = { version = "~0.7" }
+serde_json = { version = "~1" }
 # uuid generator
 uuid = { version = "~1", features = ["v4", "serde"] }
 # Base64 decoder and encoder
@@ -48,6 +50,8 @@ log = { version = "~0.4" }
 
 # Async runtime
 tokio = { version = ">=1.23.1", features = ["macros", "rt-multi-thread", "sync"] }
+# Async helpers
+futures = { version = "~0.3" }
 
 # ORM
 rorm = { version = "~0.5", features = ["cli", "tokio-rustls", "uuid"] }
