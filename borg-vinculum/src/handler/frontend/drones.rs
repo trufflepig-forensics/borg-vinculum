@@ -1,5 +1,5 @@
 use actix_web::web::{Data, Json, Path};
-use actix_web::{get, post};
+use actix_web::{delete, get, post, HttpResponse};
 use borgbackup::common::{CommonOptions, ListOptions};
 use chrono::{DateTime, Utc};
 use rand::distributions::{Alphanumeric, DistString};
@@ -191,4 +191,39 @@ pub async fn get_drone(
         active: drone.active,
         created_at: DateTime::from_local(drone.created_at, Utc),
     }))
+}
+
+/// Delete a drone by its uuid
+#[utoipa::path(
+    tag = "Drone management",
+    context_path = "/api/frontend/v1",
+    responses(
+        (status = 200, description = "Drone got deleted"),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    params(PathUuid),
+    security(("session_cookie" = [])),
+)]
+#[delete("/drones/{uuid}")]
+pub async fn delete_drone(path: Path<PathUuid>, db: Data<Database>) -> ApiResult<HttpResponse> {
+    let mut tx = db.start_transaction().await?;
+
+    let ct = query!(&mut tx, (Drone::F.uuid.count(),))
+        .condition(Drone::F.uuid.equals(path.uuid.as_ref()))
+        .one()
+        .await?
+        .0;
+
+    if ct == 0 {
+        return Err(ApiError::InvalidUuid);
+    }
+
+    rorm::delete!(&mut tx, Drone)
+        .condition(Drone::F.uuid.equals(path.uuid.as_ref()))
+        .await?;
+
+    tx.commit().await?;
+
+    Ok(HttpResponse::Ok().finish())
 }

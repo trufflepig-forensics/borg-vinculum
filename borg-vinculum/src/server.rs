@@ -20,7 +20,9 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
 use crate::config::Config;
-use crate::handler::frontend::{create_drone, get_all_drones, get_drone, login, logout};
+use crate::handler::frontend::{
+    create_drone, delete_drone, get_all_drones, get_drone, login, logout,
+};
 use crate::middleware::{handle_not_found, json_extractor_error, AuthenticationRequired};
 use crate::swagger::{ApiDoc, FrontendDoc};
 
@@ -86,7 +88,8 @@ pub async fn start_server(config: &Config, db: Database) -> Result<(), String> {
                     .wrap(AuthenticationRequired)
                     .service(create_drone)
                     .service(get_all_drones)
-                    .service(get_drone),
+                    .service(get_drone)
+                    .service(delete_drone),
             )
             .service(scope("/api/drone/v1"))
     })

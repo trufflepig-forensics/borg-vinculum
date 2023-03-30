@@ -54,7 +54,8 @@ impl Modify for CookieSecurity {
         frontend::logout,
         frontend::create_drone,
         frontend::get_all_drones,
-        frontend::get_drone
+        frontend::get_drone,
+        frontend::delete_drone
     ),
     components(schemas(
         ApiErrorResponse,
