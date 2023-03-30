@@ -48,10 +48,13 @@ jobs:
       - name: Install dependencies
         run: |
           rustup component add clippy
-          cargo install clippy-sarif sarif-fmt
+          cargo install clippy-sarif sarif-fmt cargo-deny
 
       - name: Build all in workspace
         run: cargo build -p borg-vinculum -p borg-drone
+
+      - name: Check crates with cargo deny
+        run: cargo deny check
 
       - name: Run rust-clippy
         run: cargo clippy --workspace --message-format=json | clippy-sarif | tee rust-clippy-results.sarif | sarif-fmt
