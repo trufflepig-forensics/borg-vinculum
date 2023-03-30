@@ -6,14 +6,22 @@
     feature = "rorm-main",
     allow(dead_code, unused_variables, unused_imports)
 )]
+use std::io;
+use std::io::Write;
+use std::process::exit;
 
 use actix_toolbox::logging::setup_logging;
 use actix_web::cookie::Key;
+use argon2::password_hash::SaltString;
+use argon2::{Argon2, PasswordHasher};
 use base64::prelude::{Engine, BASE64_STANDARD};
 use clap::{Parser, Subcommand};
-use rorm::{cli, Database, DatabaseConfiguration, DatabaseDriver};
+use rand::thread_rng;
+use rorm::{cli, insert, query, Database, DatabaseConfiguration, DatabaseDriver, Model};
+use uuid::Uuid;
 
 use crate::config::Config;
+use crate::models::{Account, AccountInsert};
 use crate::modules::matrix::MatrixApi;
 
 pub mod config;
@@ -38,6 +46,8 @@ pub enum Command {
     },
     /// Test the connection to the matrix server
     TestMatrix,
+    /// Create an account via cli
+    CreateAccount,
 }
 
 /// The control unit of all borg-drones
@@ -116,6 +126,60 @@ async fn main() -> Result<(), String> {
                 )
                 .await
                 .map_err(|e| format!("Error sending message to configured channel: {e}"))?;
+        }
+        Command::CreateAccount => {
+            let conf = Config::from_path(&cli.config_path)?;
+            setup_logging(&conf.logging)?;
+            let db = get_db(&conf).await?;
+
+            let stdin = io::stdin();
+            let mut stdout = io::stdout();
+
+            let mut username = String::new();
+
+            print!("Enter a username: ");
+            stdout.flush().unwrap();
+            stdin.read_line(&mut username).unwrap();
+            let username = username.trim();
+
+            if username.is_empty() {
+                eprintln!("Empty username is not allowed");
+                exit(1);
+            }
+
+            if query!(&db, (Account::F.username,))
+                .condition(Account::F.username.equals(username))
+                .optional()
+                .await
+                .unwrap()
+                .is_some()
+            {
+                eprintln!("There is already an account with that name");
+                exit(1);
+            }
+
+            let password = rpassword::prompt_password("Enter password: ").unwrap();
+            if password.is_empty() {
+                eprintln!("Empty password is not allowed");
+                exit(1);
+            }
+
+            let salt = SaltString::generate(&mut thread_rng());
+            let hashed_password = Argon2::default()
+                .hash_password(password.as_bytes(), &salt)
+                .unwrap()
+                .to_string();
+
+            insert!(&db, AccountInsert)
+                .single(&AccountInsert {
+                    username: username.to_string(),
+                    password_hash: hashed_password,
+                    uuid: Uuid::new_v4(),
+                })
+                .await
+                .map_err(|e| format!("Failed to create account: {e}"))?;
+
+            println!("Created account {username}");
         }
     }
 

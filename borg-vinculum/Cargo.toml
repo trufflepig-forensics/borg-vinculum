@@ -36,8 +36,12 @@ serde = { version = "~1", features = ["derive"] }
 toml = { version = "~0.7" }
 # uuid generator
 uuid = { version = "~1", features = ["v4", "serde"] }
+# Base64 decoder and encoder
 base64 = { version = "~0.21" }
+# Support for url parsing
 url = { version = "~2", features = ["serde"] }
+# Datetime library
+chrono = { version = ">=0.4.20", default-features = false, features = ["serde"] }
 
 # Logging facade
 log = { version = "~0.4" }
