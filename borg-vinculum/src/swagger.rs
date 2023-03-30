@@ -1,3 +1,4 @@
+use common::*;
 use utoipa::openapi::security::{ApiKey, ApiKeyValue, HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
 
@@ -27,8 +28,8 @@ impl Modify for TokenSecurity {
 /// Helper struct for the drone api openapi definitions.
 #[derive(OpenApi)]
 #[openapi(
-    paths(),
-    components(schemas(ApiErrorResponse, ApiStatusCode,)),
+    paths(api::stats),
+    components(schemas(ApiErrorResponse, ApiStatusCode, StatReport, CreateStats, HookStats)),
     modifiers(&TokenSecurity)
 )]
 pub struct ApiDoc;

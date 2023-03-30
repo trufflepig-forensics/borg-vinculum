@@ -1,14 +1,23 @@
 //! The API to the vinculum
 
-use common::Stats;
+use std::time::Duration;
+
+use common::{CreateStats, HookStats, StatReport, State};
 use reqwest::header::{HeaderMap, HeaderValue};
+use serde::Deserialize;
 use url::Url;
+
+#[derive(Deserialize)]
+struct ErrorMessage {
+    message: String,
+    code: u16,
+}
 
 /// The api definition for requests to the vinculum
 #[derive(Clone)]
 pub struct Api {
     address: Url,
-    header: HeaderMap,
+    client: reqwest::Client,
 }
 
 impl Api {
@@ -21,16 +30,64 @@ impl Api {
                 .map_err(|e| format!("Error while constructing headers for api: {e}"))?,
         );
 
-        Ok(Self { address, header })
+        let client = reqwest::Client::builder()
+            .connect_timeout(Duration::from_secs(10))
+            .timeout(Duration::from_secs(10))
+            .default_headers(header)
+            .build()
+            .map_err(|e| format!("Could not create API client: {e}"))?;
+
+        Ok(Self { address, client })
     }
 
     /// Send an error to the vinculum
-    pub async fn send_error(&self, err: &str) -> Result<(), String> {
+    pub async fn send_error(&self, err: &str, state: State) -> Result<(), String> {
         Ok(())
     }
 
     /// Send stats to the vinculum
-    pub async fn send_stats(&self, stats: Stats) -> Result<(), String> {
+    pub async fn send_stats(
+        &self,
+        pre_hook_stats: Option<HookStats>,
+        create_stats: CreateStats,
+        post_hook_stats: Option<HookStats>,
+    ) -> Result<(), String> {
+        let stat_report = StatReport {
+            pre_hook_stats,
+            create_stats,
+            post_hook_stats,
+        };
+
+        let res = self
+            .client
+            .post(self.address.join("/api/drone/v1/stats").unwrap())
+            .json(&stat_report)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        if res.status() != 200 {
+            return if res.status() == 400 || res.status() == 500 {
+                let error: ErrorMessage = res
+                    .json()
+                    .await
+                    .map_err(|e| format!("Could not deserialize error response: {e}"))?;
+
+                Err(format!(
+                    "Error code {code}: {msg}",
+                    code = error.code,
+                    msg = error.message
+                ))
+            } else {
+                let x = res
+                    .text()
+                    .await
+                    .map_err(|e| format!("Could not convert response to text: {e}"))?;
+
+                Err(format!("Unknown error returned: {x}"))
+            };
+        }
+
         Ok(())
     }
 }

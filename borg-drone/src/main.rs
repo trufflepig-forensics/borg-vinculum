@@ -6,12 +6,13 @@
 use std::env;
 
 use clap::{ArgAction, Parser, Subcommand};
+use common::State;
 use log::{debug, info, warn};
 
 use crate::api::Api;
 use crate::config::get_config;
 use crate::create::run_create;
-use crate::hooks::{run_post_hook, run_pre_hook};
+use crate::hooks::run_hook;
 
 pub mod api;
 pub mod config;
@@ -74,28 +75,40 @@ async fn main() -> Result<(), String> {
             debug!("Initializing API");
             let api = Api::new(config.vinculum_address.clone(), &config.vinculum_token)?;
 
+            let mut pre_hook_stats = None;
+            let mut create_stats = None;
+            let mut post_hook_stats = None;
+
             if config.pre_hook.is_empty() {
                 info!("Skipping pre hook");
             } else {
                 info!("Starting pre hook");
-                run_pre_hook(&api, &config).await?;
+                pre_hook_stats = Some(run_hook(&api, &config.pre_hook, State::PreHook).await?);
                 info!("Finished pre hook");
             }
 
-            if dry_run {
-                info!("Skipping archive creation");
-            } else {
+            if !dry_run {
                 info!("Starting archive creation");
-                run_create(&api, &config, progress).await?;
+                create_stats = Some(run_create(&api, &config, progress).await?);
                 info!("Finished archive creation");
+            } else {
+                info!("Skipping archive creation");
             }
 
             if config.post_hook.is_empty() {
                 info!("Skipping post hook");
             } else {
                 info!("Starting post hook");
-                run_post_hook(&api, &config).await?;
+                post_hook_stats = Some(run_hook(&api, &config.post_hook, State::PostHook).await?);
                 info!("Finished post hook");
+            }
+
+            if !dry_run {
+                if let Some(cs) = create_stats {
+                    info!("Send report to vinculum");
+                    api.send_stats(pre_hook_stats, cs, post_hook_stats).await?;
+                    info!("Report was sent successfully");
+                }
             }
         }
     }

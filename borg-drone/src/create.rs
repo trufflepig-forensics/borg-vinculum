@@ -7,8 +7,8 @@ use borgbackup::asynchronous::CreateProgress;
 use borgbackup::common::{CommonOptions, CompressionMode, CreateOptions};
 use borgbackup::output::create::Create;
 use byte_unit::Byte;
-use common::Stats;
-use log::{error, info, warn};
+use common::{CreateStats, State};
+use log::{error, info};
 use tokio::sync::mpsc;
 
 use crate::api::Api;
@@ -52,7 +52,7 @@ async fn start_create_progress(
 }
 
 /// Create a backup using the settings from [Config].
-pub async fn create(config: &Config, progress: bool) -> Result<Stats, String> {
+pub async fn create(config: &Config, progress: bool) -> Result<CreateStats, String> {
     let start = Instant::now();
 
     let common_options = CommonOptions {
@@ -88,33 +88,29 @@ pub async fn create(config: &Config, progress: bool) -> Result<Stats, String> {
 
     let duration = Instant::now().sub(start);
 
-    Ok(Stats::Create {
+    Ok(CreateStats {
         original_size: stats.archive.stats.original_size,
         compressed_size: stats.archive.stats.compressed_size,
         deduplicated_size: stats.archive.stats.deduplicated_size,
         nfiles: stats.archive.stats.nfiles,
-        duration,
+        duration: duration.as_secs(),
     })
 }
 
 /// Wrapper for [create].
 ///
 /// This will do the error handling for the create call.
-pub async fn run_create(api: &Api, config: &Config, progress: bool) -> Result<(), String> {
-    match create(config, progress).await {
-        Ok(stats) => {
-            if let Err(err) = api.send_stats(stats).await {
-                warn!("Error sending stats from create to vinculum: {err}");
-            }
-        }
+pub async fn run_create(api: &Api, config: &Config, progress: bool) -> Result<CreateStats, String> {
+    let stats = match create(config, progress).await {
+        Ok(stats) => stats,
         Err(err) => {
             error!("Error while creating archive: {err}");
-            if let Err(err) = api.send_error(&err).await {
+            if let Err(err) = api.send_error(&err, State::Create).await {
                 error!("Error while sending error to vinculum: {err}");
             }
             return Err(err);
         }
-    }
+    };
 
-    Ok(())
+    Ok(stats)
 }
