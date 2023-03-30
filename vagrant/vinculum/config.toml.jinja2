@@ -4,6 +4,11 @@ ListenPort = 8080
 # You can generate a secret key by executing: vinculum keygen
 SecretKey = "{{ vinculum_secret_key }}"
 
+[Borg]
+SshKeyPath = "/var/lib/vinculum/id_ed25519"
+BorgPath = "/usr/local/bin/borg"
+BorgRemotePath = ""
+
 [Matrix]
 Homeserver = "{{ vinculum_matrix_homeserver }}"
 Username = "{{ vinculum_matrix_username }}"
