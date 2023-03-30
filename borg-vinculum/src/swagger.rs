@@ -49,13 +49,21 @@ impl Modify for CookieSecurity {
 /// Helper struct for the frontend openapi definitions.
 #[derive(OpenApi)]
 #[openapi(
-    paths(frontend::login, frontend::logout, frontend::create_drone),
+    paths(
+        frontend::login,
+        frontend::logout,
+        frontend::create_drone,
+        frontend::get_all_drones,
+        frontend::get_drone
+    ),
     components(schemas(
         ApiErrorResponse,
         ApiStatusCode,
         frontend::LoginRequest,
         frontend::CreateDroneRequest,
-        frontend::CreateDroneResponse
+        frontend::CreateDroneResponse,
+        frontend::GetAllDronesResponse,
+        frontend::GetDroneResponse
     )),
     modifiers(&CookieSecurity)
 )]

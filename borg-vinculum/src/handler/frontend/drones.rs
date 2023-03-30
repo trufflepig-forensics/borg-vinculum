@@ -1,6 +1,7 @@
-use actix_web::post;
-use actix_web::web::{Data, Json};
+use actix_web::web::{Data, Json, Path};
+use actix_web::{get, post};
 use borgbackup::common::{CommonOptions, ListOptions};
+use chrono::{DateTime, Utc};
 use rand::distributions::{Alphanumeric, DistString};
 use rand::thread_rng;
 use rorm::{insert, query, Database, Model};
@@ -8,7 +9,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::handler::{ApiError, ApiResult};
+use crate::handler::{ApiError, ApiResult, PathUuid};
 use crate::models::{Drone, DroneInsert};
 
 /// The request to create a new drone
@@ -103,4 +104,91 @@ pub async fn create_drone(
     tx.commit().await?;
 
     Ok(Json(CreateDroneResponse { uuid, token }))
+}
+
+/// The representation of a single drone.
+///
+/// The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
+#[derive(Serialize, ToSchema)]
+pub struct GetDroneResponse {
+    uuid: Uuid,
+    #[schema(example = "one_of_nine")]
+    name: String,
+    active: bool,
+    #[schema(example = "bearer_token_will_be_here")]
+    token: String,
+    #[schema(example = "user@example.com:server/one_of_nine")]
+    repository: String,
+    created_at: DateTime<Utc>,
+}
+
+/// All available drones in the vinculum
+#[derive(Serialize, ToSchema)]
+pub struct GetAllDronesResponse {
+    drones: Vec<GetDroneResponse>,
+}
+
+/// Retrieve all drones from the vinculum
+#[utoipa::path(
+    tag = "Drone management",
+    context_path = "/api/frontend/v1",
+    responses(
+        (status = 200, description = "Retrieve all drones", body = GetAllDronesResponse),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    security(("session_cookie" = [])),
+)]
+#[get("/drones")]
+pub async fn get_all_drones(db: Data<Database>) -> ApiResult<Json<GetAllDronesResponse>> {
+    let drones = query!(db.as_ref(), Drone).all().await?;
+
+    Ok(Json(GetAllDronesResponse {
+        drones: drones
+            .into_iter()
+            .map(|x| GetDroneResponse {
+                uuid: x.uuid,
+                name: x.name,
+                repository: x.repository,
+                token: x.token,
+                active: x.active,
+                created_at: DateTime::from_local(x.created_at, Utc),
+            })
+            .collect(),
+    }))
+}
+
+/// Retrieve a drone by its uuid
+///
+/// The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
+#[utoipa::path(
+    tag = "Drone management",
+    context_path = "/api/frontend/v1",
+    responses(
+        (status = 200, description = "Retrieve the selected drone", body = GetDroneResponse),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    params(PathUuid),
+    security(("session_cookie" = [])),
+)]
+#[get("/drones/{uuid}")]
+pub async fn get_drone(
+    path: Path<PathUuid>,
+    db: Data<Database>,
+) -> ApiResult<Json<GetDroneResponse>> {
+    let drone = query!(db.as_ref(), Drone)
+        .condition(Drone::F.uuid.equals(path.uuid.as_ref()))
+        .optional()
+        .await?
+        .ok_or(ApiError::InvalidUuid)?;
+
+    Ok(Json(GetDroneResponse {
+        uuid: drone.uuid,
+        name: drone.name,
+        repository: drone.repository,
+        token: drone.token,
+        active: drone.active,
+        created_at: DateTime::from_local(drone.created_at, Utc),
+    }))
 }

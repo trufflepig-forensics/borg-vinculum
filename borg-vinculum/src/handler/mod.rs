@@ -7,12 +7,19 @@ use actix_web::body::BoxBody;
 use actix_web::HttpResponse;
 use borgbackup::errors::ListError;
 use log::{debug, error, info, trace, warn};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_repr::Serialize_repr;
-use utoipa::ToSchema;
+use utoipa::{IntoParams, ToSchema};
+use uuid::Uuid;
 
 pub mod api;
 pub mod frontend;
+
+/// The path parameter for an uuid
+#[derive(Deserialize, IntoParams)]
+pub struct PathUuid {
+    uuid: Uuid,
+}
 
 /// The result that is used throughout the complete api.
 pub type ApiResult<T> = Result<T, ApiError>;
@@ -37,6 +44,7 @@ pub(crate) enum ApiStatusCode {
     InvalidName = 1008,
     ListRepositoryError = 1009,
     RepositoryAlreadyExists = 1010,
+    InvalidUuid = 1011,
 
     InternalServerError = 2000,
     DatabaseError = 2001,
@@ -90,6 +98,8 @@ pub enum ApiError {
     ListRepositoryError(ListError),
     /// There exists already an entity with the chosen repository
     RepositoryAlreadyExists,
+    /// An invalid uuid was specified
+    InvalidUuid,
 
     /// Unknown error occurred
     InternalServerError,
@@ -133,6 +143,7 @@ impl Display for ApiError {
             ApiError::RepositoryAlreadyExists => {
                 write!(f, "There exists already an entity with that repository")
             }
+            ApiError::InvalidUuid => write!(f, "Invalid uuid specified"),
         }
     }
 }
@@ -263,6 +274,10 @@ impl actix_web::ResponseError for ApiError {
                     self.to_string(),
                 ))
             }
+            ApiError::InvalidUuid => HttpResponse::BadRequest().json(ApiErrorResponse::new(
+                ApiStatusCode::InvalidUuid,
+                self.to_string(),
+            )),
         }
     }
 }
