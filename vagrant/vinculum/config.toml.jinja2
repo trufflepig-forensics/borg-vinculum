@@ -2,7 +2,13 @@
 ListenAddress = "127.0.0.1"
 ListenPort = 8080
 # You can generate a secret key by executing: vinculum keygen
-SecretKey = ""
+SecretKey = "{{ vinculum_secret_key }}"
+
+[Matrix]
+Homeserver = "{{ vinculum_matrix_homeserver }}"
+Username = "{{ vinculum_matrix_username }}"
+Password = "{{ vinculum_matrix_password }}"
+Channel = "{{ vinculum_matrix_channel }}"
 
 [Database]
 Host = "127.0.0.1"

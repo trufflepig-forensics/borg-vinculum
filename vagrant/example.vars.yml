@@ -4,3 +4,8 @@
   vinculum_db_name: ""
   vinculum_db_password: ""
   server_name: ""
+  vinculum_secret_key: ""
+  vinculum_matrix_homeserver: ""
+  vinculum_matrix_username: ""
+  vinculum_matrix_password: ""
+  vinculum_matrix_channel: ""
