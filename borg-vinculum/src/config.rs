@@ -1,10 +1,26 @@
 //! The configuration of `borg-vinculum`
 
-use std::fs::read_to_string;
+use std::fs::{read_to_string, File};
 use std::net::IpAddr;
+use std::os::unix::fs::MetadataExt;
+use std::path::Path;
+use std::process::Command;
 
 use actix_toolbox::logging::LoggingConfig;
+use log::info;
 use serde::{Deserialize, Serialize};
+
+/// The configuration of all borg related settings
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all = "PascalCase")]
+pub struct BorgConfig {
+    /// The path to the borg utility
+    pub borg_path: String,
+    /// The path to ssh key
+    pub ssh_key_path: String,
+    /// The path where the remote borg is found
+    pub borg_remote_path: Option<String>,
+}
 
 /// The configuration of the connection to a matrix server
 #[derive(Deserialize, Serialize, Debug)]
@@ -64,13 +80,61 @@ pub struct Config {
     pub database: DBConfig,
     /// The matrix configuration
     pub matrix: MatrixConfig,
+    /// The borg related configuration
+    pub borg: BorgConfig,
+}
+
+impl TryFrom<&Path> for Config {
+    type Error = String;
+
+    fn try_from(path: &Path) -> Result<Self, Self::Error> {
+        let config_str =
+            read_to_string(path).map_err(|e| format!("Could not read config file: {e}"))?;
+        let conf: Config = toml::from_str(&config_str)
+            .map_err(|e| format!("Error deserializing config from: {e}"))?;
+
+        conf.validate()?;
+
+        Ok(conf)
+    }
 }
 
 impl Config {
-    /// Retrieve a config file using the `path` variable.
-    pub fn from_path(path: &str) -> Result<Config, String> {
-        let config_str = read_to_string(path)
-            .map_err(|e| format!("Could not read config file from {path}: {e}"))?;
-        toml::from_str(&config_str).map_err(|e| format!("Error deserializing config from: {e}"))
+    /// Validate the config
+    fn validate(&self) -> Result<(), String> {
+        if !Path::new(&self.borg.ssh_key_path).exists() {
+            info!("Did not found ssh key, try to generate");
+            let args = shlex::split(&format!(
+                "-t ed25519 -f {path} -N ''",
+                path = shlex::quote(&self.borg.ssh_key_path)
+            ))
+            .ok_or("Shlex error".to_string())?;
+            let status = Command::new("ssh-keygen")
+                .args(args)
+                .status()
+                .map_err(|e| format!("Error while executing ssh-keygen: {e}"))?;
+
+            if !status.success() {
+                return Err(format!(
+                    "ssh-keygen returned with status code != 0: {}",
+                    status.code().unwrap()
+                ));
+            }
+        }
+
+        let mode = File::open(&self.borg.ssh_key_path)
+            .map_err(|e| format!("Could not open {p}: {e}", p = self.borg.ssh_key_path))?
+            .metadata()
+            .map_err(|e| format!("{e}"))?
+            .mode();
+
+        if mode & 0o177 != 0 {
+            return Err(format!(
+                "Mode of {p} is not 0600",
+                p = self.borg.ssh_key_path
+            ));
+        }
+
+        Ok(())
     }
 }

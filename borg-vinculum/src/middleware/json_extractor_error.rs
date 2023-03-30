@@ -2,7 +2,7 @@ use actix_web::error::JsonPayloadError;
 use actix_web::HttpRequest;
 use log::info;
 
-use crate::handler::frontend::ApiError;
+use crate::handler::ApiError;
 
 pub(crate) fn json_extractor_error(err: JsonPayloadError, _req: &HttpRequest) -> actix_web::Error {
     match err {

@@ -4,7 +4,7 @@ use actix_toolbox::tb_middleware::actix_session::SessionExt;
 use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
 use futures::future::LocalBoxFuture;
 
-use crate::handler::frontend::ApiError;
+use crate::handler::ApiError;
 
 pub(crate) struct AuthenticationRequired;
 

@@ -6,17 +6,33 @@ use argon2::{Argon2, PasswordVerifier};
 use chrono::Utc;
 use rorm::{query, update, Database, Model};
 use serde::Deserialize;
+use utoipa::ToSchema;
 
-use crate::handler::frontend::{ApiError, ApiResult};
+use crate::handler::{ApiError, ApiResult};
 use crate::models::Account;
 
 /// The request to login
-#[derive(Deserialize)]
+#[derive(Deserialize, ToSchema)]
 pub struct LoginRequest {
+    #[schema(example = "seven_of_nine")]
     username: String,
+    #[schema(example = "010001010110101010101010101")]
     password: String,
 }
 
+/// Login to the vinculum
+///
+/// On successful login you will retrieve a cookie.
+#[utoipa::path(
+    tag = "Authentication",
+    context_path = "/api/frontend/v1/auth",
+    responses(
+        (status = 200, description = "Login successful"),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    request_body = LoginRequest,
+)]
 #[post("/login")]
 pub async fn login(
     req: Json<LoginRequest>,
@@ -60,7 +76,7 @@ pub async fn login(
 /// Logs a logged-in user out of his session.
 #[utoipa::path(
     tag = "Authentication",
-    context_path = "/api/v2/auth",
+    context_path = "/api/frontend/v1/auth",
     responses(
         (status = 200, description = "Logout successful"),
         (status = 400, description = "Client error", body = ApiErrorResponse),

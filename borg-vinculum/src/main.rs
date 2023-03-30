@@ -8,6 +8,7 @@
 )]
 use std::io;
 use std::io::Write;
+use std::path::Path;
 use std::process::exit;
 
 use actix_toolbox::logging::setup_logging;
@@ -69,7 +70,7 @@ async fn main() -> Result<(), String> {
 
     match cli.command {
         Command::Start => {
-            let conf = Config::from_path(&cli.config_path)?;
+            let conf = Config::try_from(Path::new(&cli.config_path))?;
             setup_logging(&conf.logging)?;
 
             let db = get_db(&conf).await?;
@@ -80,7 +81,7 @@ async fn main() -> Result<(), String> {
             println!("{}", BASE64_STANDARD.encode(key.master()));
         }
         Command::Migrate { migration_dir } => {
-            let conf = Config::from_path(&cli.config_path)?;
+            let conf = Config::try_from(Path::new(&cli.config_path))?;
             setup_logging(&conf.logging)?;
 
             cli::migrate::run_migrate_custom(
@@ -102,7 +103,7 @@ async fn main() -> Result<(), String> {
             .map_err(|e| e.to_string())?;
         }
         Command::TestMatrix => {
-            let conf = Config::from_path(&cli.config_path)?;
+            let conf = Config::try_from(Path::new(&cli.config_path))?;
             setup_logging(&conf.logging)?;
 
             let mut matrix = MatrixApi::new(conf.matrix.homeserver.parse().unwrap());
@@ -129,7 +130,7 @@ async fn main() -> Result<(), String> {
                 .map_err(|e| format!("Error sending message to configured channel: {e}"))?;
         }
         Command::CreateAccount => {
-            let conf = Config::from_path(&cli.config_path)?;
+            let conf = Config::try_from(Path::new(&cli.config_path))?;
             setup_logging(&conf.logging)?;
             let db = get_db(&conf).await?;
 

@@ -1,5 +1,7 @@
-use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
+use utoipa::openapi::security::{ApiKey, ApiKeyValue, HttpAuthScheme, HttpBuilder, SecurityScheme};
 use utoipa::{Modify, OpenApi};
+
+use crate::handler::{api, frontend, ApiErrorResponse, ApiStatusCode};
 
 struct TokenSecurity;
 
@@ -22,7 +24,39 @@ impl Modify for TokenSecurity {
     }
 }
 
-/// Helper struct for the admin openapi definitions.
+/// Helper struct for the drone api openapi definitions.
 #[derive(OpenApi)]
-#[openapi(modifiers(&TokenSecurity))]
+#[openapi(
+    paths(),
+    components(schemas(ApiErrorResponse, ApiStatusCode,)),
+    modifiers(&TokenSecurity)
+)]
 pub struct ApiDoc;
+
+struct CookieSecurity;
+
+impl Modify for CookieSecurity {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "session_cookie",
+                SecurityScheme::ApiKey(ApiKey::Cookie(ApiKeyValue::new("id"))),
+            )
+        }
+    }
+}
+
+/// Helper struct for the frontend openapi definitions.
+#[derive(OpenApi)]
+#[openapi(
+    paths(frontend::login, frontend::logout, frontend::create_drone),
+    components(schemas(
+        ApiErrorResponse,
+        ApiStatusCode,
+        frontend::LoginRequest,
+        frontend::CreateDroneRequest,
+        frontend::CreateDroneResponse
+    )),
+    modifiers(&CookieSecurity)
+)]
+pub struct FrontendDoc;
