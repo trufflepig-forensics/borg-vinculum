@@ -28,8 +28,15 @@ impl Modify for TokenSecurity {
 /// Helper struct for the drone api openapi definitions.
 #[derive(OpenApi)]
 #[openapi(
-    paths(api::stats),
-    components(schemas(ApiErrorResponse, ApiStatusCode, StatReport, CreateStats, HookStats)),
+    paths(api::stats, api::error),
+    components(schemas(
+        ApiErrorResponse,
+        ApiStatusCode,
+        StatReport,
+        CreateStats,
+        HookStats,
+        ErrorReport
+    )),
     modifiers(&TokenSecurity)
 )]
 pub struct ApiDoc;

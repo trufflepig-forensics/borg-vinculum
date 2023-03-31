@@ -63,3 +63,16 @@ pub struct StatReport {
     /// The stats of the post hook
     pub post_hook_stats: Option<HookStats>,
 }
+
+/// The report of an error
+#[derive(Serialize, Deserialize, Clone, Debug, ToSchema)]
+pub struct ErrorReport {
+    /// The state in which the error occurred
+    pub state: State,
+    /// Custom error message
+    pub custom: Option<String>,
+    /// Captured stdout
+    pub stdout: Option<String>,
+    /// Captured stderr
+    pub stderr: Option<String>,
+}

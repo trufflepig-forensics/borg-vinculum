@@ -2,8 +2,9 @@
 
 use std::time::Duration;
 
-use common::{CreateStats, HookStats, StatReport, State};
+use common::{CreateStats, ErrorReport, HookStats, StatReport};
 use reqwest::header::{HeaderMap, HeaderValue};
+use reqwest::Response;
 use serde::Deserialize;
 use url::Url;
 
@@ -40,8 +41,44 @@ impl Api {
         Ok(Self { address, client })
     }
 
+    async fn check_error(&self, res: Response) -> Result<(), String> {
+        if res.status() != 200 {
+            return if res.status() == 400 || res.status() == 500 {
+                let error: ErrorMessage = res
+                    .json()
+                    .await
+                    .map_err(|e| format!("Could not deserialize error response: {e}"))?;
+
+                Err(format!(
+                    "Error code {code}: {msg}",
+                    code = error.code,
+                    msg = error.message
+                ))
+            } else {
+                let x = res
+                    .text()
+                    .await
+                    .map_err(|e| format!("Could not convert response to text: {e}"))?;
+
+                Err(format!("Unknown error returned: {x}"))
+            };
+        }
+
+        Ok(())
+    }
+
     /// Send an error to the vinculum
-    pub async fn send_error(&self, err: &str, state: State) -> Result<(), String> {
+    pub async fn send_error(&self, error_report: ErrorReport) -> Result<(), String> {
+        let res = self
+            .client
+            .post(self.address.join("/api/drone/v1/error").unwrap())
+            .json(&error_report)
+            .send()
+            .await
+            .map_err(|e| e.to_string())?;
+
+        self.check_error(res).await?;
+
         Ok(())
     }
 
@@ -66,27 +103,7 @@ impl Api {
             .await
             .map_err(|e| e.to_string())?;
 
-        if res.status() != 200 {
-            return if res.status() == 400 || res.status() == 500 {
-                let error: ErrorMessage = res
-                    .json()
-                    .await
-                    .map_err(|e| format!("Could not deserialize error response: {e}"))?;
-
-                Err(format!(
-                    "Error code {code}: {msg}",
-                    code = error.code,
-                    msg = error.message
-                ))
-            } else {
-                let x = res
-                    .text()
-                    .await
-                    .map_err(|e| format!("Could not convert response to text: {e}"))?;
-
-                Err(format!("Unknown error returned: {x}"))
-            };
-        }
+        self.check_error(res).await?;
 
         Ok(())
     }

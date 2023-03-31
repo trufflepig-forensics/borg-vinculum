@@ -1,0 +1,8 @@
+:root {
+    --level-0: #191919;
+}
+
+body {
+    margin: 0;
+    background-color: var(--level-0);
+}

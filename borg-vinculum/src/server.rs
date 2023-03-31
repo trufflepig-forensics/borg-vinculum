@@ -20,7 +20,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
 use crate::config::Config;
-use crate::handler::api::stats;
+use crate::handler::api::{error, stats};
 use crate::handler::frontend::{
     create_drone, delete_drone, get_all_drones, get_drone, login, logout,
 };
@@ -92,7 +92,7 @@ pub async fn start_server(config: &Config, db: Database) -> Result<(), String> {
                     .service(get_drone)
                     .service(delete_drone),
             )
-            .service(scope("/api/drone/v1").service(stats))
+            .service(scope("/api/drone/v1").service(stats).service(error))
     })
     .bind((config.server.listen_address, config.server.listen_port))
     .map_err(|e| e.to_string())?

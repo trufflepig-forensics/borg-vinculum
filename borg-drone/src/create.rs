@@ -7,7 +7,7 @@ use borgbackup::asynchronous::CreateProgress;
 use borgbackup::common::{CommonOptions, CompressionMode, CreateOptions};
 use borgbackup::output::create::Create;
 use byte_unit::Byte;
-use common::{CreateStats, State};
+use common::{CreateStats, ErrorReport, State};
 use log::{error, info};
 use tokio::sync::mpsc;
 
@@ -17,16 +17,21 @@ use crate::config::Config;
 async fn start_create(
     options: &CreateOptions,
     common_options: &CommonOptions,
-) -> Result<Create, String> {
+) -> Result<Create, ErrorReport> {
     borgbackup::asynchronous::create(options, common_options)
         .await
-        .map_err(|err| err.to_string())
+        .map_err(|err| ErrorReport {
+            state: State::Create,
+            custom: Some(err.to_string()),
+            stdout: None,
+            stderr: None,
+        })
 }
 
 async fn start_create_progress(
     options: &CreateOptions,
     common_options: &CommonOptions,
-) -> Result<Create, String> {
+) -> Result<Create, ErrorReport> {
     let (tx, mut rx) = mpsc::channel(1);
     tokio::spawn(async move {
         while let Some(CreateProgress::Progress {
@@ -48,11 +53,16 @@ async fn start_create_progress(
 
     borgbackup::asynchronous::create_progress(options, common_options, tx)
         .await
-        .map_err(|err| err.to_string())
+        .map_err(|err| ErrorReport {
+            state: State::Create,
+            custom: Some(err.to_string()),
+            stdout: None,
+            stderr: None,
+        })
 }
 
 /// Create a backup using the settings from [Config].
-pub async fn create(config: &Config, progress: bool) -> Result<CreateStats, String> {
+pub async fn create(config: &Config, progress: bool) -> Result<CreateStats, ErrorReport> {
     let start = Instant::now();
 
     let common_options = CommonOptions {
@@ -104,11 +114,11 @@ pub async fn run_create(api: &Api, config: &Config, progress: bool) -> Result<Cr
     let stats = match create(config, progress).await {
         Ok(stats) => stats,
         Err(err) => {
-            error!("Error while creating archive: {err}");
-            if let Err(err) = api.send_error(&err, State::Create).await {
+            error!("Error while creating archive: {err:#?}");
+            if let Err(err) = api.send_error(err.clone()).await {
                 error!("Error while sending error to vinculum: {err}");
             }
-            return Err(err);
+            return Err(format!("{err:?}"));
         }
     };
 
