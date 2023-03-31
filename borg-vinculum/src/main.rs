@@ -21,10 +21,12 @@ use rand::thread_rng;
 use rorm::{cli, insert, query, Database, DatabaseConfiguration, DatabaseDriver, Model};
 use uuid::Uuid;
 
+use crate::chan::start_matrix_notifier;
 use crate::config::Config;
 use crate::models::{Account, AccountInsert};
 use crate::modules::matrix::MatrixApi;
 
+pub(crate) mod chan;
 pub mod config;
 pub mod handler;
 pub(crate) mod middleware;
@@ -74,7 +76,11 @@ async fn main() -> Result<(), String> {
             setup_logging(&conf.logging)?;
 
             let db = get_db(&conf).await?;
-            server::start_server(&conf, db).await?;
+
+            let matrix = MatrixApi::new(conf.matrix.homeserver.clone().parse().unwrap());
+            let matrix_notifier_chan = start_matrix_notifier(&conf, matrix).await?;
+
+            server::start_server(&conf, db, matrix_notifier_chan).await?;
         }
         Command::Keygen => {
             let key = Key::generate();
@@ -87,7 +93,7 @@ async fn main() -> Result<(), String> {
             cli::migrate::run_migrate_custom(
                 cli::config::DatabaseConfig {
                     last_migration_table_name: None,
-                    driver: cli::config::DatabaseDriver::Postgres {
+                    driver: DatabaseDriver::Postgres {
                         host: conf.database.host,
                         port: conf.database.port,
                         name: conf.database.name,
@@ -108,7 +114,7 @@ async fn main() -> Result<(), String> {
 
             let mut matrix = MatrixApi::new(conf.matrix.homeserver.parse().unwrap());
             matrix
-                .login(conf.matrix.username, conf.matrix.password)
+                .login(&conf.matrix.username, &conf.matrix.password)
                 .await
                 .map_err(|e| format!("Error login into matrix account: {e}"))?;
 

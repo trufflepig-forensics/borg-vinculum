@@ -12,6 +12,7 @@ description = "The common structs for both borg-drone and borg-vinculum"
 [dependencies]
 # Serialization and deserialization library
 serde = { version = "~1", features = ["derive"] }
+serde_json = { version = "~1" }
 
 # openapi generator
 utoipa = { version = "~3" }

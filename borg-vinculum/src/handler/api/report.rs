@@ -1,12 +1,13 @@
 use actix_web::web::{Data, Json};
 use actix_web::{post, HttpRequest, HttpResponse};
 use common::{ErrorReport, StatReport};
-use log::debug;
+use log::{debug, warn};
 use rorm::executor::Executor;
 use rorm::fields::ForeignModelByField;
 use rorm::{insert, query, Database, Model};
 use uuid::Uuid;
 
+use crate::chan::MatrixNotifierChan;
 use crate::handler::{ApiError, ApiResult};
 use crate::models::{Drone, DroneStatsInsert};
 
@@ -108,9 +109,15 @@ pub async fn error(
     req: Json<ErrorReport>,
     raw_req: HttpRequest,
     db: Data<Database>,
+    matrix: Data<MatrixNotifierChan>,
 ) -> ApiResult<HttpResponse> {
     // Retrieve drone and check for authentication
     let drone = check_auth(db.as_ref(), &raw_req).await?;
+    let report = req.into_inner();
+
+    if let Err(err) = matrix.send((drone, report)).await {
+        warn!("Error while sending to matrix notifier chan: {err}");
+    }
 
     Ok(HttpResponse::Ok().finish())
 }

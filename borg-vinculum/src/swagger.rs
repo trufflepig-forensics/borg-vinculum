@@ -35,7 +35,8 @@ impl Modify for TokenSecurity {
         StatReport,
         CreateStats,
         HookStats,
-        ErrorReport
+        ErrorReport,
+        State
     )),
     modifiers(&TokenSecurity)
 )]

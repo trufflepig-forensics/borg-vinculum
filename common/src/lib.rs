@@ -70,9 +70,12 @@ pub struct ErrorReport {
     /// The state in which the error occurred
     pub state: State,
     /// Custom error message
+    #[schema(example = "This is a custom error message")]
     pub custom: Option<String>,
     /// Captured stdout
+    #[schema(example = "This is the captured stdout")]
     pub stdout: Option<String>,
     /// Captured stderr
+    #[schema(example = "This is the captured stderr")]
     pub stderr: Option<String>,
 }

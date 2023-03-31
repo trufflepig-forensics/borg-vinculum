@@ -91,14 +91,14 @@ impl MatrixApi {
     }
 
     /// Perform a login
-    pub async fn login(&mut self, username: String, password: String) -> Result<(), MatrixError> {
+    pub async fn login(&mut self, username: &str, password: &str) -> Result<(), MatrixError> {
         let lr = LoginRequest {
             message_type: "m.login.password".to_string(),
             identifier: LoginIdentifier {
-                user: username,
+                user: username.to_owned(),
                 message_type: "m.id.user".to_string(),
             },
-            password,
+            password: password.to_owned(),
         };
         let res = self
             .client

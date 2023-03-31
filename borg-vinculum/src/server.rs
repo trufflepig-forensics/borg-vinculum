@@ -19,6 +19,7 @@ use rorm::Database;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::{SwaggerUi, Url};
 
+use crate::chan::MatrixNotifierChan;
 use crate::config::Config;
 use crate::handler::api::{error, stats};
 use crate::handler::frontend::{
@@ -28,7 +29,11 @@ use crate::middleware::{handle_not_found, json_extractor_error, AuthenticationRe
 use crate::swagger::{ApiDoc, FrontendDoc};
 
 /// Start the server
-pub async fn start_server(config: &Config, db: Database) -> Result<(), String> {
+pub async fn start_server(
+    config: &Config,
+    db: Database,
+    matrix_notifier_chan: MatrixNotifierChan,
+) -> Result<(), String> {
     let key = Key::try_from(
         BASE64_STANDARD
             .decode(&config.server.secret_key)
@@ -58,6 +63,7 @@ pub async fn start_server(config: &Config, db: Database) -> Result<(), String> {
             .app_data(JsonConfig::default().error_handler(json_extractor_error))
             .app_data(Data::new(db.clone()))
             .app_data(Data::new(common_options.clone()))
+            .app_data(Data::new(matrix_notifier_chan.clone()))
             .wrap(setup_logging_mw(LoggingMiddlewareConfig::default()))
             .wrap(Compress::default())
             .wrap(
