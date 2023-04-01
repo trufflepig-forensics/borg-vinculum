@@ -32,7 +32,7 @@ log = { version = "~0.4" }
 env_logger = { version = "~0.10" }
 
 # Borgbackup wrapper
-borgbackup = { version = "~0.5", features = ["tokio"] }
+borgbackup = { version = "~0.6", features = ["tokio"] }
 
 
 # The common structs of borg-drone and borg-vinculum
