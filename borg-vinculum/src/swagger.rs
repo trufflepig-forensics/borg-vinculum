@@ -59,6 +59,7 @@ impl Modify for CookieSecurity {
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        frontend::test,
         frontend::login,
         frontend::logout,
         frontend::create_drone,

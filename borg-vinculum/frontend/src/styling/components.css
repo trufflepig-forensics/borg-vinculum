@@ -1,0 +1,33 @@
+.input {
+    background-color: var(--level-1);
+    padding: 0.75rem;
+    color: var(--text);
+    font-size: medium;
+    border-radius: 0.5em;
+    border: 2px solid var(--level-2);
+    transition: all ease 300ms;
+}
+
+.input:focus,
+.input:hover {
+    border: 2px solid var(--primary);
+}
+
+.button {
+    border: 1px solid var(--primary-dark);
+    border-radius: 0.5em;
+    padding: 0.75em 5em;
+    background-color: var(--primary);
+    color: var(--text);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all ease 300ms;
+}
+
+.button:hover {
+    background-color: var(--primary-dark);
+}
+
+.button:active {
+    transform: translate(1px, 1px);
+}

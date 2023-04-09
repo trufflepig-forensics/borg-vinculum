@@ -11,6 +11,21 @@ use utoipa::ToSchema;
 use crate::handler::{ApiError, ApiResult};
 use crate::models::Account;
 
+/// Test the current login state
+#[utoipa::path(
+    tag = "Authentication",
+    context_path = "/api/frontend/v1",
+    responses(
+        (status = 200, description = "Login successful"),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+)]
+#[get("/test")]
+pub async fn test() -> ApiResult<HttpResponse> {
+    Ok(HttpResponse::Ok().finish())
+}
+
 /// The request to login
 #[derive(Deserialize, ToSchema)]
 pub struct LoginRequest {

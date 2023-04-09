@@ -1,8 +1,38 @@
 :root {
-    --level-0: #191919;
+    --level-0: #131313;
+    --level-1: #181818;
+    --level-2: #383838;
+
+    --primary: #e00000;
+    --primary-dark: #a00000;
+
+    --text: #eee;
+    --text-disabled: #ccc;
+}
+
+@font-face {
+    font-family: "Roboto-Light";
+    src: url('/fonts/Roboto-Light.ttf');
+}
+
+@font-face {
+    font-family: "Roboto-Thin";
+    src: url('/fonts/Roboto-Thin.ttf');
+}
+
+@font-face {
+    font-family: "Roboto-Regular";
+    src: url('/fonts/Roboto-Regular.ttf');
 }
 
 body {
     margin: 0;
-    background-color: var(--level-0);
+    font-family: Roboto-Regular, sans-serif;
+    background-color: var(--level-1);
+    color: var(--text);
+}
+
+.heading {
+    font-family: Roboto-Light, sans-serif;
+    margin: 0;
 }

@@ -23,7 +23,7 @@ use crate::chan::MatrixNotifierChan;
 use crate::config::Config;
 use crate::handler::api::{error, stats};
 use crate::handler::frontend::{
-    create_drone, delete_drone, get_all_drones, get_drone, login, logout,
+    create_drone, delete_drone, get_all_drones, get_drone, login, logout, test,
 };
 use crate::middleware::{handle_not_found, json_extractor_error, AuthenticationRequired};
 use crate::swagger::{ApiDoc, FrontendDoc};
@@ -93,6 +93,7 @@ pub async fn start_server(
             .service(
                 scope("/api/frontend/v1")
                     .wrap(AuthenticationRequired)
+                    .service(test)
                     .service(create_drone)
                     .service(get_all_drones)
                     .service(get_drone)
