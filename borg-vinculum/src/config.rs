@@ -4,14 +4,15 @@ use std::fs::{read_to_string, File};
 use std::net::IpAddr;
 use std::os::unix::fs::MetadataExt;
 use std::path::Path;
-use std::process::Command;
 
 use actix_toolbox::logging::LoggingConfig;
 use log::info;
+use rand::thread_rng;
 use serde::{Deserialize, Serialize};
+use ssh_key::{Algorithm, LineEnding, PrivateKey};
 
 /// The configuration of all borg related settings
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct BorgConfig {
     /// The path to the borg utility
@@ -23,7 +24,7 @@ pub struct BorgConfig {
 }
 
 /// The configuration of the connection to a matrix server
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct MatrixConfig {
     /// The url to a homeserver
@@ -37,7 +38,7 @@ pub struct MatrixConfig {
 }
 
 /// Configuration regarding the server
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct ServerConfig {
     /// The address the server should bind to
@@ -53,7 +54,7 @@ pub struct ServerConfig {
 }
 
 /// Configuration regarding the database
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct DBConfig {
     /// Host the database is located on
@@ -69,7 +70,7 @@ pub struct DBConfig {
 }
 
 /// The configuration file of borg-vinculum
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Config {
     /// Configuration regarding the server
@@ -82,6 +83,9 @@ pub struct Config {
     pub matrix: MatrixConfig,
     /// The borg related configuration
     pub borg: BorgConfig,
+    /// The private key
+    #[serde(skip)]
+    pub private_key: Option<PrivateKey>,
 }
 
 impl TryFrom<&Path> for Config {
@@ -90,51 +94,49 @@ impl TryFrom<&Path> for Config {
     fn try_from(path: &Path) -> Result<Self, Self::Error> {
         let config_str =
             read_to_string(path).map_err(|e| format!("Could not read config file: {e}"))?;
-        let conf: Config = toml::from_str(&config_str)
+        let mut conf: Config = toml::from_str(&config_str)
             .map_err(|e| format!("Error deserializing config from: {e}"))?;
 
-        conf.validate()?;
+        let pk = retrieve_ssh_key(&conf)?;
+        conf.private_key = Some(pk);
 
         Ok(conf)
     }
 }
 
-impl Config {
-    /// Validate the config
-    fn validate(&self) -> Result<(), String> {
-        if !Path::new(&self.borg.ssh_key_path).exists() {
-            info!("Did not found ssh key, try to generate");
-            let args = shlex::split(&format!(
-                "-t ed25519 -f {path} -N ''",
-                path = shlex::quote(&self.borg.ssh_key_path)
-            ))
-            .ok_or("Shlex error".to_string())?;
-            let status = Command::new("ssh-keygen")
-                .args(args)
-                .status()
-                .map_err(|e| format!("Error while executing ssh-keygen: {e}"))?;
+/// Retrieve a ssh private
+///
+/// It uses the provided [Config] to retrieve a ssh private key.
+/// If it doesn't yet exist, it is generated
+fn retrieve_ssh_key(conf: &Config) -> Result<PrivateKey, String> {
+    let pk_path = Path::new(&conf.borg.ssh_key_path);
 
-            if !status.success() {
-                return Err(format!(
-                    "ssh-keygen returned with status code != 0: {}",
-                    status.code().unwrap()
-                ));
-            }
-        }
+    let private_key = if !pk_path.exists() {
+        info!("Did not found ssh key, try to generate");
+        let private_key = PrivateKey::random(&mut thread_rng(), Algorithm::Ed25519)
+            .map_err(|e| format!("Error generating ssh key: {e}"))?;
 
-        let mode = File::open(&self.borg.ssh_key_path)
-            .map_err(|e| format!("Could not open {p}: {e}", p = self.borg.ssh_key_path))?
-            .metadata()
-            .map_err(|e| format!("{e}"))?
-            .mode();
+        private_key
+            .write_openssh_file(pk_path, LineEnding::LF)
+            .map_err(|e| format!("Error writing ssh key: {e}"))?;
 
-        if mode & 0o177 != 0 {
-            return Err(format!(
-                "Mode of {p} is not 0600",
-                p = self.borg.ssh_key_path
-            ));
-        }
+        private_key
+    } else {
+        PrivateKey::read_openssh_file(pk_path).map_err(|e| format!("Error reading ssh key: {e}"))?
+    };
 
-        Ok(())
+    let mode = File::open(pk_path)
+        .map_err(|e| format!("Could not open {p}: {e}", p = conf.borg.ssh_key_path))?
+        .metadata()
+        .map_err(|e| format!("{e}"))?
+        .mode();
+
+    if mode & 0o177 != 0 {
+        return Err(format!(
+            "Mode of {p} is not 0600",
+            p = conf.borg.ssh_key_path
+        ));
     }
+
+    Ok(private_key)
 }

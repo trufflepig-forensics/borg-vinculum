@@ -20,6 +20,8 @@ webauthn-rs = { version = "~0.4", features = ["danger-allow-state-serialisation"
 argon2 = { version = "~0.5" }
 # RNG library
 rand = { version = "~0.8" }
+# SSH key support
+ssh-key = { version = "~0.5", features = ["ed25519"] }
 
 # Swagger generator
 utoipa = { version = "~3", features = ["actix_extras", "repr", "chrono", "uuid", "openapi_extensions", "preserve_order"] }

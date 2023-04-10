@@ -23,7 +23,7 @@ use crate::chan::MatrixNotifierChan;
 use crate::config::Config;
 use crate::handler::api::{error, stats};
 use crate::handler::frontend::{
-    create_drone, delete_drone, get_all_drones, get_drone, login, logout, test,
+    create_drone, delete_drone, get_all_drones, get_drone, get_key, login, logout, test,
 };
 use crate::middleware::{handle_not_found, json_extractor_error, AuthenticationRequired};
 use crate::swagger::{ApiDoc, FrontendDoc};
@@ -57,6 +57,7 @@ pub async fn start_server(
     let s_addr = SocketAddr::new(config.server.listen_address, config.server.listen_port);
     info!("Starting to listen on {}", s_addr);
 
+    let conf_data = Data::new(config.clone());
     HttpServer::new(move || {
         App::new()
             .app_data(PayloadConfig::default())
@@ -64,6 +65,7 @@ pub async fn start_server(
             .app_data(Data::new(db.clone()))
             .app_data(Data::new(common_options.clone()))
             .app_data(Data::new(matrix_notifier_chan.clone()))
+            .app_data(conf_data.clone())
             .wrap(setup_logging_mw(LoggingMiddlewareConfig::default()))
             .wrap(Compress::default())
             .wrap(
@@ -94,6 +96,7 @@ pub async fn start_server(
                 scope("/api/frontend/v1")
                     .wrap(AuthenticationRequired)
                     .service(test)
+                    .service(get_key)
                     .service(create_drone)
                     .service(get_all_drones)
                     .service(get_drone)
