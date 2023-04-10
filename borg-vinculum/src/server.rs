@@ -49,7 +49,7 @@ pub async fn start_server(
         remote_path: config.borg.borg_remote_path.clone(),
         upload_ratelimit: None,
         rsh: Some(format!(
-            "ssh -i {}",
+            "ssh -i {} -o 'StrictHostKeyChecking accept-new'",
             shlex::quote(&config.borg.ssh_key_path)
         )),
     };
