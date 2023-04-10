@@ -3,6 +3,7 @@
 use std::time::Duration;
 
 use common::{CreateStats, ErrorReport, HookStats, StatReport};
+use log::info;
 use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::Response;
 use serde::Deserialize;
@@ -11,7 +12,7 @@ use url::Url;
 #[derive(Deserialize)]
 struct ErrorMessage {
     message: String,
-    code: u16,
+    status_code: u16,
 }
 
 /// The api definition for requests to the vinculum
@@ -51,7 +52,7 @@ impl Api {
 
                 Err(format!(
                     "Error code {code}: {msg}",
-                    code = error.code,
+                    code = error.status_code,
                     msg = error.message
                 ))
             } else {
@@ -94,6 +95,8 @@ impl Api {
             create_stats,
             post_hook_stats,
         };
+
+        info!("Stats: {stat_report:#?}");
 
         let res = self
             .client
