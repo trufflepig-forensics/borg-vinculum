@@ -170,6 +170,10 @@
         group: root
         src: /etc/nginx/sites-available/vinculum.conf
         dest: /etc/nginx/sites-enabled/vinculum.conf
+    - name: Removed default
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
     - name: Reload nginx
       systemd:
         name: nginx
