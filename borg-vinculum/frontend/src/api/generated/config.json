@@ -1,3 +1,20 @@
 {
-  "typescriptThreePlus": true
+  "sortParamsByRequiredFlag": true,
+  "sortModelPropertiesByRequiredFlag": true,
+  "ensureUniqueParams": true,
+  "allowUnicodeIdentifiers": false,
+  "prependFormOrBodyParameters": false,
+  "legacyDiscriminatorBehavior": true,
+  "npmVersion": "1.0.0",
+  "enumNameSuffix": "v4-compat",
+  "enumPropertyNaming": "PascalCase",
+  "supportsES6": false,
+  "snapshot": false,
+  "nullSafeAdditionalProps": false,
+  "modelPropertyNaming": "camelCase",
+  "withInterfaces": false,
+  "uesSingleRequestParameter": true,
+  "prefixParameterInterfaces": false,
+  "typescriptThreePlus": true,
+  "withoutRuntimeChecks": true
 }

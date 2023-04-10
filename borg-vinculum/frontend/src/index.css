@@ -36,3 +36,46 @@ body {
     font-family: Roboto-Light, sans-serif;
     margin: 0;
 }
+
+.popup-overlay {
+    backdrop-filter: blur(2px) !important;
+}
+
+.popup-content {
+    border-radius: 1em;
+    background-color: var(--level-0) !important;
+    padding: 1em;
+    box-shadow: 0 0 10px 2px var(--level-0);
+}
+
+.clickable-text {
+    color: var(--text);
+    transition: color ease 300ms;
+    cursor: pointer;
+}
+
+.clickable-text:hover {
+    color: var(--primary);
+}
+
+.icon-button {
+    border: 2px solid var(--level-2);
+    border-radius: 0.5em;
+    background-color: var(--level-0);
+    padding: 0.5em 1.5em;
+    cursor: pointer;
+    transition: background-color ease 400ms;
+}
+
+.icon-button:hover {
+    border: 2px solid var(--primary);
+}
+
+.icon-button:active {
+    transform: translate(2px, 2px);
+}
+
+.icon-button > svg {
+    width: 1.5em;
+    height: fit-content;
+}

@@ -1,0 +1,72 @@
+.container {
+    margin: 4em 10vw;
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+.container-heading {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.container-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.container-entry {
+    display: grid;
+    align-items: center;
+    background-color: var(--level-0);
+    border-radius: 1em;
+}
+
+.container-entry > ul {
+    margin: 0.5em 0;
+}
+
+.container-list :nth-child(1) > ul {
+    margin: 0;
+}
+
+ul {
+    display: grid;
+    grid-template-columns: [name] 1fr [repository] 1fr [token] 1fr
+}
+
+li {
+    display: flex;
+    list-style: none;
+    vertical-align: center;
+    align-items: center;
+}
+
+.public-key-container {
+    display: flex;
+    align-items: stretch;
+    gap: 1em;
+    justify-content: space-between;
+}
+
+.public-key-container :nth-child(1) {
+    flex-grow: 2;
+}
+
+.createDronePopup {
+    display: flex;
+    flex-direction: column;
+}
+
+.createDronePopup > label {
+    margin-bottom: 0.5em;
+}
+
+.createDronePopup > input {
+    margin-bottom: 0.75em;
+}
+
+.createDronePopup > button {
+    margin-top: 1.75em;
+}

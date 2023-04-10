@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { GetDroneResponse } from './GetDroneResponse';
 import {
+    GetDroneResponse,
     GetDroneResponseFromJSON,
     GetDroneResponseFromJSONTyped,
     GetDroneResponseToJSON,
-} from './GetDroneResponse';
+} from './';
 
 /**
  * All available drones in the vinculum
@@ -32,16 +32,6 @@ export interface GetAllDronesResponse {
      * @memberof GetAllDronesResponse
      */
     drones: Array<GetDroneResponse>;
-}
-
-/**
- * Check if a given object implements the GetAllDronesResponse interface.
- */
-export function instanceOfGetAllDronesResponse(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "drones" in value;
-
-    return isInstance;
 }
 
 export function GetAllDronesResponseFromJSON(json: any): GetAllDronesResponse {
@@ -70,4 +60,5 @@ export function GetAllDronesResponseToJSON(value?: GetAllDronesResponse | null):
         'drones': ((value.drones as Array<any>).map(GetDroneResponseToJSON)),
     };
 }
+
 

@@ -1,7 +1,16 @@
 import { headers } from "./helper";
 import { Err, Ok, Result } from "../utils/result";
-import { ApiError, parseError, StatusCode } from "./error";
+import { ApiError, handleError, parseError, StatusCode } from "./error";
 import { toast } from "react-toastify";
+import { Configuration, CreateDroneRequest, DroneManagementApi, KeyApi } from "./generated";
+import { UUID } from "./schemas";
+
+const configuration = new Configuration({
+    basePath: window.location.origin,
+});
+
+const droneManagementApi = new DroneManagementApi(configuration);
+const keyApi = new KeyApi(configuration);
 
 export const Api = {
     auth: {
@@ -43,5 +52,19 @@ export const Api = {
                 return Err(await parseError(res));
             }
         },
+    },
+    drones: {
+        create: (createDroneRequest: CreateDroneRequest) =>
+            handleError(
+                droneManagementApi.createDrone({
+                    createDroneRequest: createDroneRequest,
+                })
+            ),
+        all: () => handleError(droneManagementApi.getAllDrones()),
+        get: (uuid: UUID) => handleError(droneManagementApi.getDrone({ uuid })),
+        delete: (uuid: UUID) => handleError(droneManagementApi.deleteDrone({ uuid })),
+    },
+    key: {
+        get: () => handleError(keyApi.getKey()),
     },
 };

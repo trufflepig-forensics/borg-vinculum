@@ -59,21 +59,6 @@ export interface GetDroneResponse {
     createdAt: Date;
 }
 
-/**
- * Check if a given object implements the GetDroneResponse interface.
- */
-export function instanceOfGetDroneResponse(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "uuid" in value;
-    isInstance = isInstance && "name" in value;
-    isInstance = isInstance && "active" in value;
-    isInstance = isInstance && "token" in value;
-    isInstance = isInstance && "repository" in value;
-    isInstance = isInstance && "createdAt" in value;
-
-    return isInstance;
-}
-
 export function GetDroneResponseFromJSON(json: any): GetDroneResponse {
     return GetDroneResponseFromJSONTyped(json, false);
 }
@@ -110,4 +95,5 @@ export function GetDroneResponseToJSON(value?: GetDroneResponse | null): any {
         'created_at': (value.createdAt.toISOString()),
     };
 }
+
 

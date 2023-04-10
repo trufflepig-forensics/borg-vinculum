@@ -14,22 +14,20 @@
 
 
 import * as runtime from '../runtime';
-import type {
-  ApiErrorResponse,
-  CreateDroneRequest,
-  CreateDroneResponse,
-  GetAllDronesResponse,
-  GetDroneResponse,
-} from '../models';
 import {
+    ApiErrorResponse,
     ApiErrorResponseFromJSON,
     ApiErrorResponseToJSON,
+    CreateDroneRequest,
     CreateDroneRequestFromJSON,
     CreateDroneRequestToJSON,
+    CreateDroneResponse,
     CreateDroneResponseFromJSON,
     CreateDroneResponseToJSON,
+    GetAllDronesResponse,
     GetAllDronesResponseFromJSON,
     GetAllDronesResponseToJSON,
+    GetDroneResponse,
     GetDroneResponseFromJSON,
     GetDroneResponseToJSON,
 } from '../models';
@@ -47,20 +45,92 @@ export interface GetDroneRequest {
 }
 
 /**
+ * DroneManagementApi - interface
  * 
+ * @export
+ * @interface DroneManagementApiInterface
  */
-export class DroneManagementApi extends runtime.BaseAPI {
+export interface DroneManagementApiInterface {
+    /**
+     * Create a new drone  The `name` parameter must be unique for all drones.  A uuid for identification and a bearer token for use in borg drone is returned.
+     * @summary Create a new drone
+     * @param {CreateDroneRequest} createDroneRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DroneManagementApiInterface
+     */
+    createDroneRaw(requestParameters: CreateDroneOperationRequest): Promise<runtime.ApiResponse<CreateDroneResponse>>;
 
     /**
      * Create a new drone  The `name` parameter must be unique for all drones.  A uuid for identification and a bearer token for use in borg drone is returned.
      * Create a new drone
      */
-    async createDroneRaw(requestParameters: CreateDroneOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<CreateDroneResponse>> {
+    createDrone(requestParameters: CreateDroneOperationRequest): Promise<CreateDroneResponse>;
+
+    /**
+     * Delete a drone by its uuid
+     * @summary Delete a drone by its uuid
+     * @param {string} uuid 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DroneManagementApiInterface
+     */
+    deleteDroneRaw(requestParameters: DeleteDroneRequest): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Delete a drone by its uuid
+     * Delete a drone by its uuid
+     */
+    deleteDrone(requestParameters: DeleteDroneRequest): Promise<void>;
+
+    /**
+     * Retrieve all drones from the vinculum
+     * @summary Retrieve all drones from the vinculum
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DroneManagementApiInterface
+     */
+    getAllDronesRaw(): Promise<runtime.ApiResponse<GetAllDronesResponse>>;
+
+    /**
+     * Retrieve all drones from the vinculum
+     * Retrieve all drones from the vinculum
+     */
+    getAllDrones(): Promise<GetAllDronesResponse>;
+
+    /**
+     * Retrieve a drone by its uuid  The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
+     * @summary Retrieve a drone by its uuid
+     * @param {string} uuid 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DroneManagementApiInterface
+     */
+    getDroneRaw(requestParameters: GetDroneRequest): Promise<runtime.ApiResponse<GetDroneResponse>>;
+
+    /**
+     * Retrieve a drone by its uuid  The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
+     * Retrieve a drone by its uuid
+     */
+    getDrone(requestParameters: GetDroneRequest): Promise<GetDroneResponse>;
+
+}
+
+/**
+ * 
+ */
+export class DroneManagementApi extends runtime.BaseAPI implements DroneManagementApiInterface {
+
+    /**
+     * Create a new drone  The `name` parameter must be unique for all drones.  A uuid for identification and a bearer token for use in borg drone is returned.
+     * Create a new drone
+     */
+    async createDroneRaw(requestParameters: CreateDroneOperationRequest): Promise<runtime.ApiResponse<CreateDroneResponse>> {
         if (requestParameters.createDroneRequest === null || requestParameters.createDroneRequest === undefined) {
             throw new runtime.RequiredError('createDroneRequest','Required parameter requestParameters.createDroneRequest was null or undefined when calling createDrone.');
         }
 
-        const queryParameters: any = {};
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -72,7 +142,7 @@ export class DroneManagementApi extends runtime.BaseAPI {
             headers: headerParameters,
             query: queryParameters,
             body: CreateDroneRequestToJSON(requestParameters.createDroneRequest),
-        }, initOverrides);
+        });
 
         return new runtime.JSONApiResponse(response, (jsonValue) => CreateDroneResponseFromJSON(jsonValue));
     }
@@ -81,8 +151,8 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Create a new drone  The `name` parameter must be unique for all drones.  A uuid for identification and a bearer token for use in borg drone is returned.
      * Create a new drone
      */
-    async createDrone(requestParameters: CreateDroneOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<CreateDroneResponse> {
-        const response = await this.createDroneRaw(requestParameters, initOverrides);
+    async createDrone(requestParameters: CreateDroneOperationRequest): Promise<CreateDroneResponse> {
+        const response = await this.createDroneRaw(requestParameters);
         return await response.value();
     }
 
@@ -90,12 +160,12 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Delete a drone by its uuid
      * Delete a drone by its uuid
      */
-    async deleteDroneRaw(requestParameters: DeleteDroneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    async deleteDroneRaw(requestParameters: DeleteDroneRequest): Promise<runtime.ApiResponse<void>> {
         if (requestParameters.uuid === null || requestParameters.uuid === undefined) {
             throw new runtime.RequiredError('uuid','Required parameter requestParameters.uuid was null or undefined when calling deleteDrone.');
         }
 
-        const queryParameters: any = {};
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -104,7 +174,7 @@ export class DroneManagementApi extends runtime.BaseAPI {
             method: 'DELETE',
             headers: headerParameters,
             query: queryParameters,
-        }, initOverrides);
+        });
 
         return new runtime.VoidApiResponse(response);
     }
@@ -113,16 +183,16 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Delete a drone by its uuid
      * Delete a drone by its uuid
      */
-    async deleteDrone(requestParameters: DeleteDroneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.deleteDroneRaw(requestParameters, initOverrides);
+    async deleteDrone(requestParameters: DeleteDroneRequest): Promise<void> {
+        await this.deleteDroneRaw(requestParameters);
     }
 
     /**
      * Retrieve all drones from the vinculum
      * Retrieve all drones from the vinculum
      */
-    async getAllDronesRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetAllDronesResponse>> {
-        const queryParameters: any = {};
+    async getAllDronesRaw(): Promise<runtime.ApiResponse<GetAllDronesResponse>> {
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -131,7 +201,7 @@ export class DroneManagementApi extends runtime.BaseAPI {
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
-        }, initOverrides);
+        });
 
         return new runtime.JSONApiResponse(response, (jsonValue) => GetAllDronesResponseFromJSON(jsonValue));
     }
@@ -140,8 +210,8 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Retrieve all drones from the vinculum
      * Retrieve all drones from the vinculum
      */
-    async getAllDrones(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetAllDronesResponse> {
-        const response = await this.getAllDronesRaw(initOverrides);
+    async getAllDrones(): Promise<GetAllDronesResponse> {
+        const response = await this.getAllDronesRaw();
         return await response.value();
     }
 
@@ -149,12 +219,12 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Retrieve a drone by its uuid  The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
      * Retrieve a drone by its uuid
      */
-    async getDroneRaw(requestParameters: GetDroneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<GetDroneResponse>> {
+    async getDroneRaw(requestParameters: GetDroneRequest): Promise<runtime.ApiResponse<GetDroneResponse>> {
         if (requestParameters.uuid === null || requestParameters.uuid === undefined) {
             throw new runtime.RequiredError('uuid','Required parameter requestParameters.uuid was null or undefined when calling getDrone.');
         }
 
-        const queryParameters: any = {};
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -163,7 +233,7 @@ export class DroneManagementApi extends runtime.BaseAPI {
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
-        }, initOverrides);
+        });
 
         return new runtime.JSONApiResponse(response, (jsonValue) => GetDroneResponseFromJSON(jsonValue));
     }
@@ -172,8 +242,8 @@ export class DroneManagementApi extends runtime.BaseAPI {
      * Retrieve a drone by its uuid  The parameter `token` is used as bearer token to authenticate the drone to the vinculum.
      * Retrieve a drone by its uuid
      */
-    async getDrone(requestParameters: GetDroneRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<GetDroneResponse> {
-        const response = await this.getDroneRaw(requestParameters, initOverrides);
+    async getDrone(requestParameters: GetDroneRequest): Promise<GetDroneResponse> {
+        const response = await this.getDroneRaw(requestParameters);
         return await response.value();
     }
 

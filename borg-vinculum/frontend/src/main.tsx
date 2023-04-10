@@ -88,11 +88,6 @@ class Router extends React.Component<RouterProps, RouterState> {
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <>
         <Router />
-        <ToastContainer
-            autoClose={3500}
-            theme="dark"
-            toastClassName="toast-pane"
-            progressClassName="toast-neon toast-progress"
-        />
+        <ToastContainer autoClose={3500} theme="dark" />
     </>
 );

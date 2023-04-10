@@ -13,12 +13,12 @@
  */
 
 import { exists, mapValues } from '../runtime';
-import type { ApiStatusCode } from './ApiStatusCode';
 import {
+    ApiStatusCode,
     ApiStatusCodeFromJSON,
     ApiStatusCodeFromJSONTyped,
     ApiStatusCodeToJSON,
-} from './ApiStatusCode';
+} from './';
 
 /**
  * The Response that is returned in case of an error
@@ -41,17 +41,6 @@ export interface ApiErrorResponse {
      * @memberof ApiErrorResponse
      */
     statusCode: ApiStatusCode;
-}
-
-/**
- * Check if a given object implements the ApiErrorResponse interface.
- */
-export function instanceOfApiErrorResponse(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "message" in value;
-    isInstance = isInstance && "statusCode" in value;
-
-    return isInstance;
 }
 
 export function ApiErrorResponseFromJSON(json: any): ApiErrorResponse {
@@ -82,4 +71,5 @@ export function ApiErrorResponseToJSON(value?: ApiErrorResponse | null): any {
         'status_code': ApiStatusCodeToJSON(value.statusCode),
     };
 }
+
 

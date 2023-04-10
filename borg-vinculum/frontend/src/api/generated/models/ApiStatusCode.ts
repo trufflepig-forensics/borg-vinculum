@@ -12,7 +12,6 @@
  * Do not edit the class manually.
  */
 
-
 /**
  * The status code represents a unique identifier for an error.
  * 
@@ -20,26 +19,25 @@
  * that could be handled by the client.
  * Error codes in the range of 2000..3000 represent server errors.
  * @export
+ * @enum {string}
  */
-export const ApiStatusCode = {
-    NUMBER_1000: 1000,
-    NUMBER_1001: 1001,
-    NUMBER_1002: 1002,
-    NUMBER_1003: 1003,
-    NUMBER_1004: 1004,
-    NUMBER_1005: 1005,
-    NUMBER_1006: 1006,
-    NUMBER_1007: 1007,
-    NUMBER_1008: 1008,
-    NUMBER_1009: 1009,
-    NUMBER_1010: 1010,
-    NUMBER_1011: 1011,
-    NUMBER_2000: 2000,
-    NUMBER_2001: 2001,
-    NUMBER_2002: 2002
-} as const;
-export type ApiStatusCode = typeof ApiStatusCode[keyof typeof ApiStatusCode];
-
+export enum ApiStatusCode {
+    NUMBER_1000 = 1000,
+    NUMBER_1001 = 1001,
+    NUMBER_1002 = 1002,
+    NUMBER_1003 = 1003,
+    NUMBER_1004 = 1004,
+    NUMBER_1005 = 1005,
+    NUMBER_1006 = 1006,
+    NUMBER_1007 = 1007,
+    NUMBER_1008 = 1008,
+    NUMBER_1009 = 1009,
+    NUMBER_1010 = 1010,
+    NUMBER_1011 = 1011,
+    NUMBER_2000 = 2000,
+    NUMBER_2001 = 2001,
+    NUMBER_2002 = 2002
+}
 
 export function ApiStatusCodeFromJSON(json: any): ApiStatusCode {
     return ApiStatusCodeFromJSONTyped(json, false);

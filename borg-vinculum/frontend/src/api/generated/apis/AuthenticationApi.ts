@@ -14,13 +14,11 @@
 
 
 import * as runtime from '../runtime';
-import type {
-  ApiErrorResponse,
-  LoginRequest,
-} from '../models';
 import {
+    ApiErrorResponse,
     ApiErrorResponseFromJSON,
     ApiErrorResponseToJSON,
+    LoginRequest,
     LoginRequestFromJSON,
     LoginRequestToJSON,
 } from '../models';
@@ -30,20 +28,75 @@ export interface LoginOperationRequest {
 }
 
 /**
+ * AuthenticationApi - interface
  * 
+ * @export
+ * @interface AuthenticationApiInterface
  */
-export class AuthenticationApi extends runtime.BaseAPI {
+export interface AuthenticationApiInterface {
+    /**
+     * Login to the vinculum  On successful login you will retrieve a cookie.
+     * @summary Login to the vinculum
+     * @param {LoginRequest} loginRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthenticationApiInterface
+     */
+    loginRaw(requestParameters: LoginOperationRequest): Promise<runtime.ApiResponse<void>>;
 
     /**
      * Login to the vinculum  On successful login you will retrieve a cookie.
      * Login to the vinculum
      */
-    async loginRaw(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
+    login(requestParameters: LoginOperationRequest): Promise<void>;
+
+    /**
+     * Log out of this session  Logs a logged-in user out of his session.
+     * @summary Log out of this session
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthenticationApiInterface
+     */
+    logoutRaw(): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Log out of this session  Logs a logged-in user out of his session.
+     * Log out of this session
+     */
+    logout(): Promise<void>;
+
+    /**
+     * Test the current login state
+     * @summary Test the current login state
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AuthenticationApiInterface
+     */
+    testRaw(): Promise<runtime.ApiResponse<void>>;
+
+    /**
+     * Test the current login state
+     * Test the current login state
+     */
+    test(): Promise<void>;
+
+}
+
+/**
+ * 
+ */
+export class AuthenticationApi extends runtime.BaseAPI implements AuthenticationApiInterface {
+
+    /**
+     * Login to the vinculum  On successful login you will retrieve a cookie.
+     * Login to the vinculum
+     */
+    async loginRaw(requestParameters: LoginOperationRequest): Promise<runtime.ApiResponse<void>> {
         if (requestParameters.loginRequest === null || requestParameters.loginRequest === undefined) {
             throw new runtime.RequiredError('loginRequest','Required parameter requestParameters.loginRequest was null or undefined when calling login.');
         }
 
-        const queryParameters: any = {};
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -55,7 +108,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
             headers: headerParameters,
             query: queryParameters,
             body: LoginRequestToJSON(requestParameters.loginRequest),
-        }, initOverrides);
+        });
 
         return new runtime.VoidApiResponse(response);
     }
@@ -64,16 +117,16 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Login to the vinculum  On successful login you will retrieve a cookie.
      * Login to the vinculum
      */
-    async login(requestParameters: LoginOperationRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.loginRaw(requestParameters, initOverrides);
+    async login(requestParameters: LoginOperationRequest): Promise<void> {
+        await this.loginRaw(requestParameters);
     }
 
     /**
      * Log out of this session  Logs a logged-in user out of his session.
      * Log out of this session
      */
-    async logoutRaw(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<void>> {
-        const queryParameters: any = {};
+    async logoutRaw(): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: runtime.HTTPQuery = {};
 
         const headerParameters: runtime.HTTPHeaders = {};
 
@@ -82,7 +135,7 @@ export class AuthenticationApi extends runtime.BaseAPI {
             method: 'GET',
             headers: headerParameters,
             query: queryParameters,
-        }, initOverrides);
+        });
 
         return new runtime.VoidApiResponse(response);
     }
@@ -91,8 +144,35 @@ export class AuthenticationApi extends runtime.BaseAPI {
      * Log out of this session  Logs a logged-in user out of his session.
      * Log out of this session
      */
-    async logout(initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<void> {
-        await this.logoutRaw(initOverrides);
+    async logout(): Promise<void> {
+        await this.logoutRaw();
+    }
+
+    /**
+     * Test the current login state
+     * Test the current login state
+     */
+    async testRaw(): Promise<runtime.ApiResponse<void>> {
+        const queryParameters: runtime.HTTPQuery = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/frontend/v1/test`,
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.VoidApiResponse(response);
+    }
+
+    /**
+     * Test the current login state
+     * Test the current login state
+     */
+    async test(): Promise<void> {
+        await this.testRaw();
     }
 
 }

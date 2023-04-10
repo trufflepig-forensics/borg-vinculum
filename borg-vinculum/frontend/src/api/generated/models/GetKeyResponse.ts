@@ -14,41 +14,34 @@
 
 import { exists, mapValues } from '../runtime';
 /**
- * The response of a request to create a drone
+ * The response to a get key request
  * @export
- * @interface CreateDroneResponse
+ * @interface GetKeyResponse
  */
-export interface CreateDroneResponse {
+export interface GetKeyResponse {
     /**
      * 
      * @type {string}
-     * @memberof CreateDroneResponse
+     * @memberof GetKeyResponse
      */
-    uuid: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof CreateDroneResponse
-     */
-    token: string;
+    publicKey: string;
 }
 
-export function CreateDroneResponseFromJSON(json: any): CreateDroneResponse {
-    return CreateDroneResponseFromJSONTyped(json, false);
+export function GetKeyResponseFromJSON(json: any): GetKeyResponse {
+    return GetKeyResponseFromJSONTyped(json, false);
 }
 
-export function CreateDroneResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): CreateDroneResponse {
+export function GetKeyResponseFromJSONTyped(json: any, ignoreDiscriminator: boolean): GetKeyResponse {
     if ((json === undefined) || (json === null)) {
         return json;
     }
     return {
         
-        'uuid': json['uuid'],
-        'token': json['token'],
+        'publicKey': json['public_key'],
     };
 }
 
-export function CreateDroneResponseToJSON(value?: CreateDroneResponse | null): any {
+export function GetKeyResponseToJSON(value?: GetKeyResponse | null): any {
     if (value === undefined) {
         return undefined;
     }
@@ -57,8 +50,7 @@ export function CreateDroneResponseToJSON(value?: CreateDroneResponse | null): a
     }
     return {
         
-        'uuid': value.uuid,
-        'token': value.token,
+        'public_key': value.publicKey,
     };
 }
 

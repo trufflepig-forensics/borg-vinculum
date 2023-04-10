@@ -39,18 +39,6 @@ export interface CreateDroneRequest {
     passphrase: string;
 }
 
-/**
- * Check if a given object implements the CreateDroneRequest interface.
- */
-export function instanceOfCreateDroneRequest(value: object): boolean {
-    let isInstance = true;
-    isInstance = isInstance && "name" in value;
-    isInstance = isInstance && "repository" in value;
-    isInstance = isInstance && "passphrase" in value;
-
-    return isInstance;
-}
-
 export function CreateDroneRequestFromJSON(json: any): CreateDroneRequest {
     return CreateDroneRequestFromJSONTyped(json, false);
 }
@@ -81,4 +69,5 @@ export function CreateDroneRequestToJSON(value?: CreateDroneRequest | null): any
         'passphrase': value.passphrase,
     };
 }
+
 
