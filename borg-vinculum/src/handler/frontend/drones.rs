@@ -10,7 +10,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 use crate::handler::{ApiError, ApiResult, PathUuid};
-use crate::models::{Drone, DroneInsert};
+use crate::models::{Drone, DroneInsert, DroneStats};
 
 /// The request to create a new drone
 #[derive(Deserialize, ToSchema)]
@@ -193,6 +193,75 @@ pub async fn get_drone(
         active: drone.active,
         created_at: DateTime::from_local(drone.created_at, Utc),
         last_activity: drone.last_activity.map(|x| DateTime::from_local(x, Utc)),
+    }))
+}
+
+/// A single stat record of a drone
+#[derive(Serialize, ToSchema)]
+pub struct DroneStat {
+    pre_hook_duration: Option<i64>,
+    post_hook_duration: Option<i64>,
+    create_duration: i64,
+    complete_duration: i64,
+    original_size: i64,
+    compressed_size: i64,
+    deduplicated_size: i64,
+    nfiles: i64,
+    created_at: DateTime<Utc>,
+}
+
+/// The stats of a drone
+#[derive(Serialize, ToSchema)]
+pub struct GetDroneStats {
+    stats: Vec<DroneStat>,
+}
+
+#[utoipa::path(
+    tag = "Drone management",
+    context_path = "/api/frontend/v1",
+    responses(
+        (status = 200, description = "Retrieved the stats of the drone", body = GetDroneStats),
+        (status = 400, description = "Client error", body = ApiErrorResponse),
+        (status = 500, description = "Server error", body = ApiErrorResponse)
+    ),
+    params(PathUuid),
+    security(("session_cookie" = [])),
+)]
+#[get("/drones/{uuid}/stats")]
+pub async fn get_drone_stats(
+    path: Path<PathUuid>,
+    db: Data<Database>,
+) -> ApiResult<Json<GetDroneStats>> {
+    let mut tx = db.start_transaction().await?;
+
+    let mut drone = query!(&mut tx, Drone)
+        .condition(Drone::F.uuid.equals(path.uuid.as_ref()))
+        .optional()
+        .await?
+        .ok_or(ApiError::InvalidUuid)?;
+
+    Drone::F.stats.populate(&mut tx, &mut drone).await?;
+
+    tx.commit().await?;
+
+    Ok(Json(GetDroneStats {
+        stats: drone
+            .stats
+            .cached
+            .unwrap()
+            .into_iter()
+            .map(|x: DroneStats| DroneStat {
+                pre_hook_duration: x.pre_hook_duration,
+                post_hook_duration: x.post_hook_duration,
+                create_duration: x.create_duration,
+                complete_duration: x.complete_duration,
+                nfiles: x.nfiles,
+                original_size: x.original_size,
+                compressed_size: x.compressed_size,
+                deduplicated_size: x.deduplicated_size,
+                created_at: DateTime::from_utc(x.created_at, Utc),
+            })
+            .collect(),
     }))
 }
 

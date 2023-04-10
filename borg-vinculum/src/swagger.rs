@@ -67,6 +67,7 @@ impl Modify for CookieSecurity {
         frontend::get_drone,
         frontend::delete_drone,
         frontend::get_key,
+        frontend::get_drone_stats
     ),
     components(schemas(
         ApiErrorResponse,
@@ -77,6 +78,8 @@ impl Modify for CookieSecurity {
         frontend::GetAllDronesResponse,
         frontend::GetDroneResponse,
         frontend::GetKeyResponse,
+        frontend::GetDroneStats,
+        frontend::DroneStat,
     )),
     modifiers(&CookieSecurity)
 )]
