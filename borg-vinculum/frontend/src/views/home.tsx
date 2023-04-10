@@ -42,6 +42,7 @@ type HomeState = {
     drones: Array<GetDroneResponse>;
     newDrone: Drone | null;
     dronePopup: UUID | null;
+    deleteDronePopup: UUID | null;
     droneData: Array<DroneStat>;
 
     showNfiles: boolean;
@@ -60,6 +61,7 @@ export default class Home extends React.Component<HomeProps, HomeState> {
             newDrone: null,
             dronePopup: null,
             droneData: [],
+            deleteDronePopup: null,
 
             showNfiles: false,
             showOriginalSize: true,
@@ -70,6 +72,7 @@ export default class Home extends React.Component<HomeProps, HomeState> {
         this.createDrone = this.createDrone.bind(this);
         this.updateDrones = this.updateDrones.bind(this);
         this.transformDroneStats = this.transformDroneStats.bind(this);
+        this.deleteDrone = this.deleteDrone.bind(this);
     }
 
     async createDrone(e: React.FormEvent<HTMLFormElement>) {
@@ -95,6 +98,19 @@ export default class Home extends React.Component<HomeProps, HomeState> {
             },
             (err) => toast.update(t, { render: err.message, type: "error", isLoading: false, autoClose: 3500 })
         );
+    }
+
+    deleteDrone(uuid: UUID) {
+        return async () => {
+            (await Api.drones.delete(uuid)).match(
+                () => {
+                    toast.success("Drone got deleted");
+                    this.setState({ deleteDronePopup: null });
+                    this.updateDrones();
+                },
+                (err) => toast.error(err.message)
+            );
+        };
     }
 
     updateDrones() {
@@ -175,41 +191,54 @@ export default class Home extends React.Component<HomeProps, HomeState> {
         let drones = [];
         for (const drone of this.state.drones) {
             drones.push(
-                <div className={"container-entry"} onClick={this.fetchDroneStats(drone.uuid)}>
-                    <ul>
-                        <li key={"name"}>{drone.name}</li>
-                        <li key={"repository"}>
-                            <p
-                                className={"clickable-text"}
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    await navigator.clipboard.writeText(drone.repository);
-                                    toast.success("Copied repository to clipboard");
-                                }}
-                            >
-                                {drone.repository}
-                            </p>
-                        </li>
-                        <li key={"token"}>
-                            <button
-                                className={"icon-button"}
-                                type={"button"}
-                                onClick={async (e) => {
-                                    e.stopPropagation();
-                                    await navigator.clipboard.writeText(drone.token);
-                                    toast.success("Copied token to clipboard");
-                                }}
-                            >
-                                <svg fill="#eee" width="800px" height="800px" viewBox="0 0 32 32" version="1.1">
-                                    <title>clipboard</title>
-                                    <path d="M2.016 30.016q0 0.832 0.576 1.408t1.408 0.576h24q0.832 0 1.408-0.576t0.608-1.408v-26.016q0-0.832-0.608-1.408t-1.408-0.576h-4v4h2.016v21.984h-20v-21.984h1.984v-4h-4q-0.832 0-1.408 0.576t-0.576 1.408v26.016zM8 26.016h16v-18.016h-1.984q0 0.832-0.608 1.44t-1.408 0.576h-8q-0.832 0-1.408-0.576t-0.576-1.44h-2.016v18.016zM10.016 6.016q0 0.832 0.576 1.408t1.408 0.576h8q0.832 0 1.408-0.576t0.608-1.408v-4h-4v-2.016h-4v2.016h-4v4zM14.016 6.016v-2.016h4v2.016h-4z"></path>
-                                </svg>
-                            </button>
-                        </li>
-                        <li key={"last-activity"}>
-                            {drone.lastActivity !== undefined ? drone.lastActivity?.toLocaleString() : "N/A"}
-                        </li>
-                    </ul>
+                <div className={"container-entry"}>
+                    <div onClick={this.fetchDroneStats(drone.uuid)}>
+                        <ul>
+                            <li key={"name"}>{drone.name}</li>
+                            <li key={"repository"}>
+                                <p
+                                    className={"clickable-text"}
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        await navigator.clipboard.writeText(drone.repository);
+                                        toast.success("Copied repository to clipboard");
+                                    }}
+                                >
+                                    {drone.repository}
+                                </p>
+                            </li>
+                            <li key={"token"}>
+                                <button
+                                    className={"icon-button"}
+                                    type={"button"}
+                                    onClick={async (e) => {
+                                        e.stopPropagation();
+                                        await navigator.clipboard.writeText(drone.token);
+                                        toast.success("Copied token to clipboard");
+                                    }}
+                                >
+                                    <svg fill="#eee" width="800px" height="800px" viewBox="0 0 32 32" version="1.1">
+                                        <title>clipboard</title>
+                                        <path d="M2.016 30.016q0 0.832 0.576 1.408t1.408 0.576h24q0.832 0 1.408-0.576t0.608-1.408v-26.016q0-0.832-0.608-1.408t-1.408-0.576h-4v4h2.016v21.984h-20v-21.984h1.984v-4h-4q-0.832 0-1.408 0.576t-0.576 1.408v26.016zM8 26.016h16v-18.016h-1.984q0 0.832-0.608 1.44t-1.408 0.576h-8q-0.832 0-1.408-0.576t-0.576-1.44h-2.016v18.016zM10.016 6.016q0 0.832 0.576 1.408t1.408 0.576h8q0.832 0 1.408-0.576t0.608-1.408v-4h-4v-2.016h-4v2.016h-4v4zM14.016 6.016v-2.016h4v2.016h-4z"></path>
+                                    </svg>
+                                </button>
+                            </li>
+                            <li key={"last-activity"}>
+                                {drone.lastActivity !== undefined ? drone.lastActivity?.toLocaleString() : "N/A"}
+                            </li>
+                        </ul>
+                    </div>
+                    <button
+                        className={"delete-button"}
+                        type={"button"}
+                        onClick={() => {
+                            this.setState({ deleteDronePopup: drone.uuid });
+                        }}
+                    >
+                        <svg fill="#eee" width="800px" height="800px" viewBox="0 0 24 24">
+                            <path d="M22,5H17V2a1,1,0,0,0-1-1H8A1,1,0,0,0,7,2V5H2A1,1,0,0,0,2,7H3.117L5.008,22.124A1,1,0,0,0,6,23H18a1,1,0,0,0,.992-.876L20.883,7H22a1,1,0,0,0,0-2ZM9,3h6V5H9Zm8.117,18H6.883L5.133,7H18.867Z" />
+                        </svg>
+                    </button>
                 </div>
             );
         }
@@ -368,6 +397,38 @@ export default class Home extends React.Component<HomeProps, HomeState> {
                                 />
                             </div>
                         </div>
+                    </div>
+                </Popup>
+                <Popup
+                    open={!!this.state.deleteDronePopup}
+                    onClose={() => {
+                        this.setState({ deleteDronePopup: null });
+                    }}
+                    closeOnDocumentClick={true}
+                    modal={true}
+                    nested={true}
+                >
+                    <h3 className={"heading"}>Confirm deletion</h3>
+                    <p>Are you sure that you want to delete the drone?</p>
+                    <div className={"confirm-dialog"}>
+                        <button
+                            className={"button"}
+                            onClick={
+                                !!this.state.deleteDronePopup
+                                    ? this.deleteDrone(this.state.deleteDronePopup)
+                                    : undefined
+                            }
+                        >
+                            I'm sure
+                        </button>
+                        <button
+                            className={"button"}
+                            onClick={() => {
+                                this.setState({ deleteDronePopup: null });
+                            }}
+                        >
+                            Let me reconsider
+                        </button>
                     </div>
                 </Popup>
             </>

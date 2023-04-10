@@ -17,24 +17,59 @@
 }
 
 .container-entry {
+    background-color: var(--primary);
+    border-radius: 1.1em;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.container-entry:hover {
+}
+
+.container-entry > div {
     display: grid;
     align-items: center;
     background-color: var(--level-0);
     border-radius: 1em;
     cursor: pointer;
-    transition: background-color ease 300ms;
+    transition: all ease 300ms;
+    width: 100%;
 }
 
-.container-entry:hover {
+.container-entry:hover > div {
     background-color: black;
+    width: calc(100% - 3em);
 }
 
-.container-entry > ul {
+.container-entry:hover > .delete-button {
+    width: 6em;
+}
+
+.container-entry > div > ul {
     margin: 0.5em 0;
 }
 
-.container-list :nth-child(1) > ul {
+.container-list :nth-child(1) > div > ul {
     margin: 0;
+}
+
+.delete-button {
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    width: 0;
+    overflow: hidden;
+    transition: width ease 300ms;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.delete-button > svg {
+    width: 2em;
+    height: fit-content;
 }
 
 ul {
@@ -98,4 +133,10 @@ li {
     display: flex;
     flex-direction: column;
     gap: 1em;
+}
+
+.confirm-dialog {
+    display: grid;
+    gap: 1em;
+    grid-template-columns: 1fr 1fr;
 }
