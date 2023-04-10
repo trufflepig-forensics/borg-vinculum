@@ -10,7 +10,7 @@ use common::State;
 use log::{debug, info, warn};
 
 use crate::api::Api;
-use crate::config::get_config;
+use crate::config::Config;
 use crate::create::run_create;
 use crate::hooks::run_hook;
 
@@ -68,7 +68,7 @@ async fn main() -> Result<(), String> {
 
     env_logger::init();
 
-    let config = get_config(&cli.config_path)?;
+    let config = Config::try_from(cli.config_path.as_str())?;
 
     match cli.command {
         Command::Create { dry_run, progress } => {
