@@ -31,3 +31,40 @@
 .button:active {
     transform: translate(1px, 1px);
 }
+
+.checkbox {
+    display: flex;
+    background-color: var(--level-0);
+    padding: 0.5em 1em;
+    border-radius: 0.5em;
+    color: var(--text-disabled);
+    gap: 1em;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.checkbox > div {
+    border-radius: 50%;
+    width: 1.5em;
+    height: 1.5em;
+    background-color: black;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkbox > div > div {
+    border-radius: 50%;
+    width: 0.75em;
+    height: 0.75em;
+}
+
+.checkbox-checked {
+    background-color: var(--primary);
+    transition: background-color ease 300ms;
+}
+
+.checkbox-checked:hover {
+    background-color: var(--primary-dark);
+}

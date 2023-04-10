@@ -57,6 +57,12 @@ export interface GetDroneResponse {
      * @memberof GetDroneResponse
      */
     createdAt: Date;
+    /**
+     * 
+     * @type {Date}
+     * @memberof GetDroneResponse
+     */
+    lastActivity?: Date | null;
 }
 
 export function GetDroneResponseFromJSON(json: any): GetDroneResponse {
@@ -75,6 +81,7 @@ export function GetDroneResponseFromJSONTyped(json: any, ignoreDiscriminator: bo
         'token': json['token'],
         'repository': json['repository'],
         'createdAt': (new Date(json['created_at'])),
+        'lastActivity': !exists(json, 'last_activity') ? undefined : (json['last_activity'] === null ? null : new Date(json['last_activity'])),
     };
 }
 
@@ -93,6 +100,7 @@ export function GetDroneResponseToJSON(value?: GetDroneResponse | null): any {
         'token': value.token,
         'repository': value.repository,
         'created_at': (value.createdAt.toISOString()),
+        'last_activity': value.lastActivity === undefined ? undefined : (value.lastActivity === null ? null : value.lastActivity.toISOString()),
     };
 }
 

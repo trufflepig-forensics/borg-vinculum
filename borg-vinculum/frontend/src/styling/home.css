@@ -21,6 +21,12 @@
     align-items: center;
     background-color: var(--level-0);
     border-radius: 1em;
+    cursor: pointer;
+    transition: background-color ease 300ms;
+}
+
+.container-entry:hover {
+    background-color: black;
 }
 
 .container-entry > ul {
@@ -33,7 +39,7 @@
 
 ul {
     display: grid;
-    grid-template-columns: [name] 1fr [repository] 1fr [token] 1fr
+    grid-template-columns: [name] 2fr [repository] 2fr [token] 1fr [last-activity] 2fr;
 }
 
 li {
@@ -69,4 +75,27 @@ li {
 
 .createDronePopup > button {
     margin-top: 1.75em;
+}
+
+.drone-stats-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
+.drone-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2em;
+}
+
+.drone-stats-canvas {
+    width: 60vw;
+}
+
+.drone-stats-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
 }

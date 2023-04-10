@@ -62,6 +62,7 @@ export const Api = {
             ),
         all: () => handleError(droneManagementApi.getAllDrones()),
         get: (uuid: UUID) => handleError(droneManagementApi.getDrone({ uuid })),
+        stats: (uuid: UUID) => handleError(droneManagementApi.getDroneStats({ uuid })),
         delete: (uuid: UUID) => handleError(droneManagementApi.deleteDrone({ uuid })),
     },
     key: {

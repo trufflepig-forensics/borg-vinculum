@@ -43,9 +43,9 @@ body {
 
 .popup-content {
     border-radius: 1em;
-    background-color: var(--level-0) !important;
+    background-color: black !important;
     padding: 1em;
-    box-shadow: 0 0 10px 2px var(--level-0);
+    box-shadow: 0 0 10px 2px black;
 }
 
 .clickable-text {
@@ -78,4 +78,8 @@ body {
 .icon-button > svg {
     width: 1.5em;
     height: fit-content;
+}
+
+.monospace {
+    font-family: monospace;
 }

@@ -30,6 +30,9 @@ import {
     GetDroneResponse,
     GetDroneResponseFromJSON,
     GetDroneResponseToJSON,
+    GetDroneStats,
+    GetDroneStatsFromJSON,
+    GetDroneStatsToJSON,
 } from '../models';
 
 export interface CreateDroneOperationRequest {
@@ -41,6 +44,10 @@ export interface DeleteDroneRequest {
 }
 
 export interface GetDroneRequest {
+    uuid: string;
+}
+
+export interface GetDroneStatsRequest {
     uuid: string;
 }
 
@@ -113,6 +120,19 @@ export interface DroneManagementApiInterface {
      * Retrieve a drone by its uuid
      */
     getDrone(requestParameters: GetDroneRequest): Promise<GetDroneResponse>;
+
+    /**
+     * 
+     * @param {string} uuid 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof DroneManagementApiInterface
+     */
+    getDroneStatsRaw(requestParameters: GetDroneStatsRequest): Promise<runtime.ApiResponse<GetDroneStats>>;
+
+    /**
+     */
+    getDroneStats(requestParameters: GetDroneStatsRequest): Promise<GetDroneStats>;
 
 }
 
@@ -244,6 +264,34 @@ export class DroneManagementApi extends runtime.BaseAPI implements DroneManageme
      */
     async getDrone(requestParameters: GetDroneRequest): Promise<GetDroneResponse> {
         const response = await this.getDroneRaw(requestParameters);
+        return await response.value();
+    }
+
+    /**
+     */
+    async getDroneStatsRaw(requestParameters: GetDroneStatsRequest): Promise<runtime.ApiResponse<GetDroneStats>> {
+        if (requestParameters.uuid === null || requestParameters.uuid === undefined) {
+            throw new runtime.RequiredError('uuid','Required parameter requestParameters.uuid was null or undefined when calling getDroneStats.');
+        }
+
+        const queryParameters: runtime.HTTPQuery = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        const response = await this.request({
+            path: `/api/frontend/v1/drones/{uuid}/stats`.replace(`{${"uuid"}}`, encodeURIComponent(String(requestParameters.uuid))),
+            method: 'GET',
+            headers: headerParameters,
+            query: queryParameters,
+        });
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => GetDroneStatsFromJSON(jsonValue));
+    }
+
+    /**
+     */
+    async getDroneStats(requestParameters: GetDroneStatsRequest): Promise<GetDroneStats> {
+        const response = await this.getDroneStatsRaw(requestParameters);
         return await response.value();
     }
 
