@@ -67,6 +67,7 @@ pub async fn create(config: &Config, progress: bool) -> Result<CreateStats, Erro
 
     let common_options = CommonOptions {
         remote_path: config.borg.remote_path.clone(),
+        rsh: Some("ssh -o 'StrictHostKeyChecking accept-new'".to_string()),
         ..CommonOptions::default()
     };
 
