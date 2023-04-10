@@ -131,6 +131,17 @@
       command:
         chdir: /vagrant/borg-vinculum
         cmd: /usr/local/bin/vinculum migrate migrations/
+    - name: Install ssh key
+      copy:
+        src: vinculum/id_ed25519
+        dest: /var/lib/vinculum/id_ed25519
+        mode: 0600
+        owner: vinculum
+        group: vinculum
+    - name: Restart vinculum
+      systemd:
+        name: vinculum.service
+        state: restarted
 
     - name: Install packages
       become_user: vagrant

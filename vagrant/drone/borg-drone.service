@@ -1,0 +1,9 @@
+[Unit]
+Description=Borg drone backup creation
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/borg-drone create
+
+[Install]
+WantedBy=multi-user.target

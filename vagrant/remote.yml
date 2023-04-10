@@ -18,3 +18,15 @@
         name: "borg"
         create_home: yes
         generate_ssh_key: true
+
+    - name: Add vinculum to authorized keys
+      authorized_key:
+        key: "{{ lookup('file', 'vinculum/id_ed25519.pub') }}"
+        user: borg
+        key_options: "command=\"borg serve\",restrict"
+
+    - name: Add drone to authorized keys
+      authorized_key:
+        key: "{{ lookup('file', 'drone/id_ed25519.pub') }}"
+        user: borg
+        key_options: "command=\"borg serve --append-only --restrict-to-repository 1_of_9\",restrict"

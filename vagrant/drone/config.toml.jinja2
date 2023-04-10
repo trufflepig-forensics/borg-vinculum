@@ -1,0 +1,10 @@
+VinculumAddress = "http://10.11.11.10"
+VinculumToken = "{{ drone_token }}"
+PreHook = ""
+PostHook = ""
+
+[Borg]
+RemotePath = ""
+PatternFilePath = "/etc/borg-drone/patterns.lst"
+Repository = "{{ drone_repository }}"
+Passphrase = "{{ drone_passphrase }}"

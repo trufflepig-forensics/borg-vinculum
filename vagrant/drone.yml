@@ -61,3 +61,28 @@
         dest: /usr/local/bin/borg-drone
         mode: 0755
         owner: root
+
+    - name: Install borg-drone service
+      copy:
+        src: drone/borg-drone.service
+        dest: /etc/systemd/system/borg-drone.service
+        mode: 0640
+        owner: root
+
+    - name: Create patterns file
+      blockinfile:
+        path: /etc/borg-drone/patterns.lst
+        block: |
+          R /root
+          R /etc
+        owner: root
+        group: root
+        mode: 0640
+        create: yes
+
+    - name: Install ssh key
+      copy:
+        src: drone/id_ed25519
+        dest: /root/.ssh/id_ed25519
+        mode: 0600
+        owner: root
