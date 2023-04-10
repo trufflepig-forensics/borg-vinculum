@@ -7,7 +7,7 @@
   tasks:
     - name: Install borg
       get_url:
-        url: "https://github.com/borgbackup/borg/releases/download/1.2.3/borg-linux64"
+        url: "https://github.com/borgbackup/borg/releases/download/1.2.4/borg-linux64"
         dest: /usr/local/bin/borg
         mode: 0755
         owner: root
