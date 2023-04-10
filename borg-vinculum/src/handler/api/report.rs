@@ -1,10 +1,11 @@
 use actix_web::web::{Data, Json};
 use actix_web::{post, HttpRequest, HttpResponse};
+use chrono::Utc;
 use common::{ErrorReport, StatReport};
 use log::{debug, warn};
 use rorm::executor::Executor;
 use rorm::fields::ForeignModelByField;
-use rorm::{insert, query, Database, Model};
+use rorm::{insert, query, update, Database, Model};
 use uuid::Uuid;
 
 use crate::chan::MatrixNotifierChan;
@@ -86,6 +87,12 @@ pub async fn stats(
             deduplicated_size: req.create_stats.deduplicated_size as i64,
             nfiles: req.create_stats.nfiles as i64,
         })
+        .await?;
+
+    update!(&mut tx, Drone)
+        .condition(Drone::F.uuid.equals(drone.uuid.as_ref()))
+        .set(Drone::F.last_activity, Utc::now().naive_utc())
+        .exec()
         .await?;
 
     tx.commit().await?;

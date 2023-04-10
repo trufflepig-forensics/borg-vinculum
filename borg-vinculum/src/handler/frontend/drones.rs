@@ -120,6 +120,7 @@ pub struct GetDroneResponse {
     #[schema(example = "user@example.com:server/one_of_nine")]
     repository: String,
     created_at: DateTime<Utc>,
+    last_activity: Option<DateTime<Utc>>,
 }
 
 /// All available drones in the vinculum
@@ -153,6 +154,7 @@ pub async fn get_all_drones(db: Data<Database>) -> ApiResult<Json<GetAllDronesRe
                 token: x.token,
                 active: x.active,
                 created_at: DateTime::from_local(x.created_at, Utc),
+                last_activity: x.last_activity.map(|x| DateTime::from_local(x, Utc)),
             })
             .collect(),
     }))
@@ -190,6 +192,7 @@ pub async fn get_drone(
         token: drone.token,
         active: drone.active,
         created_at: DateTime::from_local(drone.created_at, Utc),
+        last_activity: drone.last_activity.map(|x| DateTime::from_local(x, Utc)),
     }))
 }
 

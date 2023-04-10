@@ -35,6 +35,9 @@ pub struct Drone {
 
     /// The stats of this drone
     pub stats: BackRef<field!(DroneStats::F.drone)>,
+
+    /// The last time the drone has contacted the vinculum
+    pub last_activity: Option<chrono::NaiveDateTime>,
 }
 
 #[derive(Patch)]

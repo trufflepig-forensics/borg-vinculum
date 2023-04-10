@@ -1,5 +1,5 @@
 [Migration]
-Hash = "15669082092251168440"
+Hash = "7141401469978744608"
 Initial = true
 Replaces = []
 
@@ -84,6 +84,11 @@ Type = "auto_create_time"
 
 [[Migration.Operations.Fields.Annotations]]
 Type = "not_null"
+
+[[Migration.Operations.Fields]]
+Name = "last_activity"
+Type = "datetime"
+Annotations = []
 
 [[Migration.Operations]]
 Type = "CreateModel"
