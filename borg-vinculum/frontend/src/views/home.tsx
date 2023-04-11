@@ -19,8 +19,9 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import CheckBox from "../components/checkbox";
-import { de } from "date-fns/locale";
+import { de, enCA } from "date-fns/locale";
 import "chartjs-adapter-date-fns";
+import { formatBytes } from "../utils/formatter";
 
 ChartJS.register(CategoryScale, LinearScale, TimeSeriesScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -132,24 +133,18 @@ export default class Home extends React.Component<HomeProps, HomeState> {
     transformDroneStats() {
         let labels = [];
 
-        let nfiles = [];
         let originalSize = [];
         let compressedSize = [];
         let deduplicatedSize = [];
 
         for (let stats of this.state.droneData) {
             labels.push(stats.createdAt.toLocaleString());
-            nfiles.push(stats.nfiles);
             originalSize.push(stats.originalSize);
             compressedSize.push(stats.compressedSize);
             deduplicatedSize.push(stats.deduplicatedSize);
         }
 
         let datasets = [];
-
-        if (this.state.showNfiles) {
-            datasets.push({ label: "nfiles", data: nfiles, borderColor: "white" });
-        }
 
         if (this.state.showOriginalSize) {
             datasets.push({ label: "original size", data: originalSize, borderColor: "purple" });
@@ -371,11 +366,23 @@ export default class Home extends React.Component<HomeProps, HomeState> {
                                             x: {
                                                 type: "timeseries",
                                                 time: {
-                                                    unit: "minute",
+                                                    displayFormats: {
+                                                        minute: "yyyy-MM-dd HH:mm",
+                                                    },
+                                                    round: "minute",
                                                 },
                                                 adapters: {
                                                     date: {
                                                         locale: de,
+                                                    },
+                                                },
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    callback: function (value, index, ticks) {
+                                                        return formatBytes(
+                                                            typeof value === "string" ? parseInt(value) : value
+                                                        );
                                                     },
                                                 },
                                             },
@@ -385,13 +392,6 @@ export default class Home extends React.Component<HomeProps, HomeState> {
                                 />
                             </div>
                             <div className={"drone-stats-controls"}>
-                                <CheckBox
-                                    label={"nfiles"}
-                                    value={this.state.showNfiles}
-                                    onChange={() => {
-                                        this.setState({ showNfiles: !this.state.showNfiles });
-                                    }}
-                                />
                                 <CheckBox
                                     label={"original size"}
                                     value={this.state.showOriginalSize}
