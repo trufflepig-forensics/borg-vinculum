@@ -1,5 +1,5 @@
 import React from "react";
-import { DroneStat, GetDroneResponse, GetDroneStats } from "../api/generated";
+import { DroneStat, GetDroneResponse } from "../api/generated";
 import { Api } from "../api/api";
 import { toast } from "react-toastify";
 import Popup from "reactjs-popup";
@@ -11,6 +11,7 @@ import {
     Chart as ChartJS,
     Legend,
     LinearScale,
+    TimeSeriesScale,
     LineElement,
     PointElement,
     Title,
@@ -18,17 +19,10 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import CheckBox from "../components/checkbox";
+import { de } from "date-fns/locale";
+import "chartjs-adapter-date-fns";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-export const options = {
-    responsive: true,
-    plugins: {
-        legend: {
-            position: "top" as const,
-        },
-    },
-};
+ChartJS.register(CategoryScale, LinearScale, TimeSeriesScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 type Drone = {
     name: string;
@@ -166,11 +160,11 @@ export default class Home extends React.Component<HomeProps, HomeState> {
         }
 
         if (this.state.showDeduplicatedSize) {
-            datasets.push({ label: "deduplicated size", data: compressedSize, borderColor: "orange" });
+            datasets.push({ label: "deduplicated size", data: deduplicatedSize, borderColor: "orange" });
         }
 
         return {
-            labels: this.state.droneData.map((x) => x.createdAt.toLocaleString()),
+            labels: this.state.droneData.map((x) => x.createdAt),
             datasets: datasets,
         };
     }
@@ -250,7 +244,6 @@ export default class Home extends React.Component<HomeProps, HomeState> {
             popupDrone = null;
         }
 
-        // @ts-ignore
         return (
             <>
                 <div className={"container"}>
@@ -364,7 +357,32 @@ export default class Home extends React.Component<HomeProps, HomeState> {
                         </h3>
                         <div className={"drone-stats"}>
                             <div className={"drone-stats-canvas"}>
-                                <Line datasetIdKey={"id"} options={options} data={this.transformDroneStats()} />
+                                <Line
+                                    datasetIdKey={"id"}
+                                    options={{
+                                        responsive: true,
+                                        plugins: {
+                                            legend: {
+                                                position: "top" as const,
+                                            },
+                                        },
+                                        animation: false,
+                                        scales: {
+                                            x: {
+                                                type: "timeseries",
+                                                time: {
+                                                    unit: "minute",
+                                                },
+                                                adapters: {
+                                                    date: {
+                                                        locale: de,
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    }}
+                                    data={this.transformDroneStats()}
+                                />
                             </div>
                             <div className={"drone-stats-controls"}>
                                 <CheckBox
