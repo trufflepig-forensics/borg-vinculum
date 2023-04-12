@@ -12,7 +12,7 @@ repository = "https://github.com/trufflepig-forensics/borg-vinculum"
 # Webframework
 actix-web = { version = "~4" }
 # Helper and middleware for actix-web
-actix-toolbox = { version = "~0.10", features = ["logging", "session"] }
+actix-toolbox = { version = "~0.11", features = ["logging", "session"] }
 # Webauthn library
 webauthn-rs = { version = "~0.4", features = ["danger-allow-state-serialisation"] }
 
