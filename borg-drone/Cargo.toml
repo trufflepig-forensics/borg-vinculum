@@ -23,16 +23,16 @@ reqwest = { version = "~0.11", features = ["rustls-tls-native-roots", "json"] }
 # serialization support
 serde = { version = "~1", features = ["derive"] }
 serde_json = { version = "~1" }
-toml = { version = "~0.7" }
+toml = { version = "~0.8" }
 url = { version = "~2", features = ["serde"] }
 byte-unit = { version = "~4" }
 
 # Logging
 log = { version = "~0.4" }
-env_logger = { version = "~0.10" }
+env_logger = { version = "~0.11" }
 
 # Borgbackup wrapper
-borgbackup = { version = "~0.6", features = ["tokio"] }
+borgbackup = { version = "~0.7", features = ["tokio"] }
 
 
 # The common structs of borg-drone and borg-vinculum

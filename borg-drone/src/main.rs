@@ -33,6 +33,10 @@ pub enum Command {
         /// Output the progress while archive creation
         #[clap(short = 'p', long, default_value_t = false)]
         progress: bool,
+
+        /// Do not report the results to the vinculum
+        #[clap(short = 'R', long, default_value_t = false)]
+        dont_report: bool,
     },
 }
 
@@ -71,7 +75,7 @@ async fn main() -> Result<(), String> {
     let config = Config::try_from(cli.config_path.as_str())?;
 
     match cli.command {
-        Command::Create { dry_run, progress } => {
+        Command::Create { dry_run, progress, dont_report } => {
             debug!("Initializing API");
             let api = Api::new(config.vinculum_address.clone(), &config.vinculum_token)?;
 
@@ -103,7 +107,7 @@ async fn main() -> Result<(), String> {
                 info!("Finished post hook");
             }
 
-            if !dry_run {
+            if !dry_run && !dont_report {
                 if let Some(cs) = create_stats {
                     info!("Send report to vinculum");
                     api.send_stats(pre_hook_stats, cs, post_hook_stats).await?;
